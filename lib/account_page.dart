@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -10,205 +10,225 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  final TextEditingController _carModelController = TextEditingController();
   final TextEditingController _carYearController = TextEditingController();
-  final TextEditingController _engineTypeController = TextEditingController();
+  String? _selectedBrand;
+  String? _selectedModel;
+  String? _selectedEngine;
   bool _isLoading = false;
+  List<String> _brands = [];
+  List<String> _models = [];
+  List<String> _engines = [];
 
   @override
   void initState() {
     super.initState();
-    _loadCarDetails();
+    _loadBrands();
   }
 
   @override
   void dispose() {
-    _carModelController.dispose();
     _carYearController.dispose();
-    _engineTypeController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadCarDetails() async {
+  Future<void> _loadBrands() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          if (mounted) {
-            setState(() {
-              // Remove the code that sets the TextEditingController values from the database
-            });
-          }
-        }
+      final response = await http.get(Uri.parse('http://127.0.0.1:8081/brands'));
+      if (response.statusCode == 200) {
+        final List<dynamic> brands = json.decode(response.body);
+        setState(() {
+          _brands = brands.cast<String>();
+        });
+      } else {
+        throw Exception('Failed to load brands');
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading car details: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _saveCarDetails() async {
-    final carModel = _carModelController.text.trim();
-    final carYear = _carYearController.text.trim();
-    final engineType = _engineTypeController.text.trim();
-
-    if (carModel.isEmpty || carYear.isEmpty || engineType.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('All fields are required!'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Error loading brands: $e')),
       );
-      return;
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
 
+  Future<void> _loadModels(String brand) async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'carModel': carModel,
-          'carYear': carYear,
-          'engineType': engineType,
+      final response = await http.get(Uri.parse('http://127.0.0.1:8081/models?brand=$brand'));
+      if (response.statusCode == 200) {
+        final List<dynamic> models = json.decode(response.body);
+        setState(() {
+          _models = models.cast<String>();
         });
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Car details saved successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Clear the controllers after saving the details
-          _carModelController.clear();
-          _carYearController.clear();
-          _engineTypeController.clear();
-        }
+      } else {
+        throw Exception('Failed to load models');
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving car details: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading models: $e')),
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
-  void _logout() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, '/login');
+  Future<void> _loadEngines(String model) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await http.get(Uri.parse('http://127.0.0.1:8081/engines?model=$model'));
+      if (response.statusCode == 200) {
+        final List<dynamic> engines = json.decode(response.body);
+        setState(() {
+          _engines = engines.cast<String>();
+        });
+      } else {
+        throw Exception('Failed to load engines');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading engines: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _selectYear(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime? picked = await showDialog<DateTime>(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: YearPicker(
+            firstDate: DateTime(1900),
+            lastDate: now,
+            initialDate: now,
+            selectedDate: now,
+            onChanged: (DateTime dateTime) {
+              Navigator.pop(context, dateTime);
+            },
+          ),
+        );
+      },
+    );
+    if (picked != null && picked.year.toString() != _carYearController.text) {
+      setState(() {
+        _carYearController.text = picked.year.toString();
+      });
+    }
+  }
+
+  void _navigateToLogScreen(BuildContext context) {
+    Navigator.pushReplacementNamed(context, '/fuel_log');
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Account Details'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, '/fuel_log');
-          },
+          onPressed: () => _navigateToLogScreen(context),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
-          ),
-        ],
       ),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard on tap
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextField(
-                      controller: _carModelController,
-                      decoration: const InputDecoration(labelText: 'Car Model'),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _carYearController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Year of Manufacture'),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _engineTypeController,
-                      decoration: const InputDecoration(labelText: 'Engine Type'),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _saveCarDetails,
-                      child: const Text('Save Details'),
-                    ),
-                    const SizedBox(height: 24),
-                    if (user != null)
-                      StreamBuilder<DocumentSnapshot>(
-                        stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          }
-                          if (!snapshot.hasData || !snapshot.data!.exists) {
-                            return const Text(
-                              'No car details found. Please enter your car details.',
-                              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-                            );
-                          }
-                          final carDetails = snapshot.data!.data() as Map<String, dynamic>;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Car Details:',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 8),
-                              Text('Model: ${carDetails['carModel']}', style: const TextStyle(fontSize: 16)),
-                              Text('Year: ${carDetails['carYear']}', style: const TextStyle(fontSize: 16)),
-                              Text('Engine: ${carDetails['engineType']}', style: const TextStyle(fontSize: 16)),
-                            ],
-                          );
-                        },
-                      ),
-                  ],
-                ),
-        ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: _selectedBrand,
+                    hint: const Text('Select Brand'),
+                    items: _brands.map((String brand) {
+                      return DropdownMenuItem<String>(
+                        value: brand,
+                        child: Text(brand),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedBrand = newValue;
+                        _models = [];
+                        _engines = [];
+                        _selectedModel = null;
+                        _selectedEngine = null;
+                      });
+                      if (newValue != null) {
+                        _loadModels(newValue);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedModel,
+                    hint: const Text('Select Model'),
+                    items: _models.map((String model) {
+                      return DropdownMenuItem<String>(
+                        value: model,
+                        child: Text(model),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedModel = newValue;
+                        _engines = [];
+                        _selectedEngine = null;
+                      });
+                      if (newValue != null) {
+                        _loadEngines(newValue);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedEngine,
+                    hint: const Text('Select Engine'),
+                    items: _engines.map((String engine) {
+                      return DropdownMenuItem<String>(
+                        value: engine,
+                        child: Text(engine),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedEngine = newValue;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _carYearController,
+                    readOnly: true,
+                    onTap: () => _selectYear(context),
+                    decoration: const InputDecoration(labelText: 'Year of Manufacture'),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Save details or perform other actions
+                    },
+                    child: const Text('Save Details'),
+                  ),
+                ],
+              ),
       ),
     );
   }
