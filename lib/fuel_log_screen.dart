@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-// import 'account_page.dart'; // Account details page
 
 class FuelLogScreen extends StatefulWidget {
   const FuelLogScreen({super.key});
@@ -38,7 +38,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     FocusScope.of(context).requestFocus(_kmFocusNode);
   }
 
-  void _addLog() {
+  Future<void> _addLog() async {
     final double? kilometers = double.tryParse(_kmController.text);
     final double? liters = double.tryParse(_litersController.text);
 
@@ -50,6 +50,19 @@ class FuelLogScreenState extends State<FuelLogScreen> {
 
       _kmController.clear();
       _litersController.clear();
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('logs')
+            .add({
+          'kilometers': kilometers,
+          'liters': liters,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      }
     }
   }
 
@@ -77,6 +90,8 @@ class FuelLogScreenState extends State<FuelLogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fuel Tracker'),
@@ -133,16 +148,41 @@ class FuelLogScreenState extends State<FuelLogScreen> {
             ),
             const Divider(),
             Expanded(
-              child: ListView.builder(
-                itemCount: _logs.length,
-                itemBuilder: (context, index) {
-                  final log = _logs[index];
-                  return ListTile(
-                    title: Text('Kilometers: ${log['kilometers']}'),
-                    subtitle: Text('Liters: ${log['liters']}'),
-                  );
-                },
-              ),
+              child: user != null
+                  ? StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .collection('logs')
+                          .orderBy('timestamp', descending: true)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Text(
+                            'No logs found. Please add some logs.',
+                            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                          );
+                        }
+                        final logs = snapshot.data!.docs;
+                        return ListView.builder(
+                          itemCount: logs.length,
+                          itemBuilder: (context, index) {
+                            final log = logs[index].data() as Map<String, dynamic>;
+                            return ListTile(
+                              title: Text('Kilometers: ${log['kilometers']}'),
+                              subtitle: Text('Liters: ${log['liters']}'),
+                            );
+                          },
+                        );
+                      },
+                    )
+                  : const Text(
+                      'Please log in to view your logs.',
+                      style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                    ),
             ),
           ],
         ),

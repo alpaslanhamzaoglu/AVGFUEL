@@ -25,11 +25,39 @@ class FuelTrackerApp extends StatelessWidget {
       title: 'Fuel Tracker',
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: FirebaseAuth.instance.currentUser == null ? '/login' : '/fuel_log',
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/fuel_log': (context) => const FuelLogScreen(),
-        '/signup': (context) => const SignUpPage(), // Sign Up page route
-        '/account': (context) => const AccountPage(), // Account page route
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/login':
+            return _buildPageRoute(const LoginPage(), settings);
+          case '/fuel_log':
+            return _buildPageRoute(const FuelLogScreen(), settings);
+          case '/signup':
+            return _buildPageRoute(const SignUpPage(), settings);
+          case '/account':
+            return _buildPageRoute(const AccountPage(), settings);
+          default:
+            return null;
+        }
+      },
+    );
+  }
+
+  PageRouteBuilder _buildPageRoute(Widget page, RouteSettings settings) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeInOut;
+
+        final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        final offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
       },
     );
   }

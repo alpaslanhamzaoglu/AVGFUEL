@@ -1,0 +1,2297 @@
+[
+    {
+        "brand": "Toyota",
+        "models": [
+            {
+                "name": "Toyota Model 1",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Toyota Model 2",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Toyota Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Toyota Model 4",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Toyota Model 5",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Toyota Model 6",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Toyota Model 7",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Toyota Model 8",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Toyota Model 9",
+                "engine": "Electric"
+            },
+            {
+                "name": "Toyota Model 10",
+                "engine": "Electric"
+            }
+        ]
+    },
+    {
+        "brand": "Honda",
+        "models": [
+            {
+                "name": "Honda Model 1",
+                "engine": "Electric"
+            },
+            {
+                "name": "Honda Model 2",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Honda Model 3",
+                "engine": "Electric"
+            },
+            {
+                "name": "Honda Model 4",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Honda Model 5",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Honda Model 6",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Honda Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Honda Model 8",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Honda Model 9",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Honda Model 10",
+                "engine": "1.5L Turbo I4"
+            }
+        ]
+    },
+    {
+        "brand": "Ford",
+        "models": [
+            {
+                "name": "Ford Model 1",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Ford Model 2",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Ford Model 3",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Ford Model 4",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Ford Model 5",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Ford Model 6",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Ford Model 7",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Ford Model 8",
+                "engine": "Electric"
+            },
+            {
+                "name": "Ford Model 9",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Ford Model 10",
+                "engine": "4.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "BMW",
+        "models": [
+            {
+                "name": "BMW Model 1",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "BMW Model 2",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "BMW Model 3",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "BMW Model 4",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "BMW Model 5",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "BMW Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "BMW Model 7",
+                "engine": "Electric"
+            },
+            {
+                "name": "BMW Model 8",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "BMW Model 9",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "BMW Model 10",
+                "engine": "1.5L Turbo I4"
+            }
+        ]
+    },
+    {
+        "brand": "Mercedes-Benz",
+        "models": [
+            {
+                "name": "Mercedes-Benz Model 1",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Mercedes-Benz Model 2",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Mercedes-Benz Model 3",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Mercedes-Benz Model 4",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Mercedes-Benz Model 5",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Mercedes-Benz Model 6",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Mercedes-Benz Model 7",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Mercedes-Benz Model 8",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Mercedes-Benz Model 9",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Mercedes-Benz Model 10",
+                "engine": "2.0L Turbo I4"
+            }
+        ]
+    },
+    {
+        "brand": "Chevrolet",
+        "models": [
+            {
+                "name": "Chevrolet Model 1",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Chevrolet Model 2",
+                "engine": "Electric"
+            },
+            {
+                "name": "Chevrolet Model 3",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Chevrolet Model 4",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Chevrolet Model 5",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Chevrolet Model 6",
+                "engine": "Electric"
+            },
+            {
+                "name": "Chevrolet Model 7",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Chevrolet Model 8",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Chevrolet Model 9",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Chevrolet Model 10",
+                "engine": "3.5L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Hyundai",
+        "models": [
+            {
+                "name": "Hyundai Model 1",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Hyundai Model 2",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Hyundai Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Hyundai Model 4",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Hyundai Model 5",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Hyundai Model 6",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Hyundai Model 7",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Hyundai Model 8",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Hyundai Model 9",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Hyundai Model 10",
+                "engine": "1.5L Turbo I4"
+            }
+        ]
+    },
+    {
+        "brand": "Nissan",
+        "models": [
+            {
+                "name": "Nissan Model 1",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Nissan Model 2",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Nissan Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Nissan Model 4",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Nissan Model 5",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Nissan Model 6",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Nissan Model 7",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Nissan Model 8",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Nissan Model 9",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Nissan Model 10",
+                "engine": "Electric"
+            }
+        ]
+    },
+    {
+        "brand": "Volkswagen",
+        "models": [
+            {
+                "name": "Volkswagen Model 1",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Volkswagen Model 2",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Volkswagen Model 3",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Volkswagen Model 4",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Volkswagen Model 5",
+                "engine": "Electric"
+            },
+            {
+                "name": "Volkswagen Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Volkswagen Model 7",
+                "engine": "Electric"
+            },
+            {
+                "name": "Volkswagen Model 8",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Volkswagen Model 9",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Volkswagen Model 10",
+                "engine": "3.5L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Audi",
+        "models": [
+            {
+                "name": "Audi Model 1",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Audi Model 2",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Audi Model 3",
+                "engine": "Electric"
+            },
+            {
+                "name": "Audi Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Audi Model 5",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Audi Model 6",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Audi Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Audi Model 8",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Audi Model 9",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Audi Model 10",
+                "engine": "3.5L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Kia",
+        "models": [
+            {
+                "name": "Kia Model 1",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Kia Model 2",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Kia Model 3",
+                "engine": "Electric"
+            },
+            {
+                "name": "Kia Model 4",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Kia Model 5",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Kia Model 6",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Kia Model 7",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Kia Model 8",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Kia Model 9",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Kia Model 10",
+                "engine": "1.0L Turbo I3"
+            }
+        ]
+    },
+    {
+        "brand": "Mazda",
+        "models": [
+            {
+                "name": "Mazda Model 1",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Mazda Model 2",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Mazda Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Mazda Model 4",
+                "engine": "Electric"
+            },
+            {
+                "name": "Mazda Model 5",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Mazda Model 6",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Mazda Model 7",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Mazda Model 8",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Mazda Model 9",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Mazda Model 10",
+                "engine": "Electric"
+            }
+        ]
+    },
+    {
+        "brand": "Subaru",
+        "models": [
+            {
+                "name": "Subaru Model 1",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Subaru Model 2",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Subaru Model 3",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Subaru Model 4",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Subaru Model 5",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Subaru Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Subaru Model 7",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Subaru Model 8",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Subaru Model 9",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Subaru Model 10",
+                "engine": "Electric"
+            }
+        ]
+    },
+    {
+        "brand": "Lexus",
+        "models": [
+            {
+                "name": "Lexus Model 1",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Lexus Model 2",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Lexus Model 3",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Lexus Model 4",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Lexus Model 5",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Lexus Model 6",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Lexus Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Lexus Model 8",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Lexus Model 9",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Lexus Model 10",
+                "engine": "1.0L Turbo I3"
+            }
+        ]
+    },
+    {
+        "brand": "Porsche",
+        "models": [
+            {
+                "name": "Porsche Model 1",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Porsche Model 2",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Porsche Model 3",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Porsche Model 4",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Porsche Model 5",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Porsche Model 6",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Porsche Model 7",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Porsche Model 8",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Porsche Model 9",
+                "engine": "Electric"
+            },
+            {
+                "name": "Porsche Model 10",
+                "engine": "2.5L I4"
+            }
+        ]
+    },
+    {
+        "brand": "Tesla",
+        "models": [
+            {
+                "name": "Tesla Model 1",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Tesla Model 2",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Tesla Model 3",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Tesla Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Tesla Model 5",
+                "engine": "Electric"
+            },
+            {
+                "name": "Tesla Model 6",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Tesla Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Tesla Model 8",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Tesla Model 9",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Tesla Model 10",
+                "engine": "1.0L Turbo I3"
+            }
+        ]
+    },
+    {
+        "brand": "Volvo",
+        "models": [
+            {
+                "name": "Volvo Model 1",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Volvo Model 2",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Volvo Model 3",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Volvo Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Volvo Model 5",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Volvo Model 6",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Volvo Model 7",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Volvo Model 8",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Volvo Model 9",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Volvo Model 10",
+                "engine": "2.5L I4"
+            }
+        ]
+    },
+    {
+        "brand": "Jaguar",
+        "models": [
+            {
+                "name": "Jaguar Model 1",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Jaguar Model 2",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Jaguar Model 3",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Jaguar Model 4",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Jaguar Model 5",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Jaguar Model 6",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Jaguar Model 7",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Jaguar Model 8",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Jaguar Model 9",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Jaguar Model 10",
+                "engine": "1.5L Turbo I4"
+            }
+        ]
+    },
+    {
+        "brand": "Land Rover",
+        "models": [
+            {
+                "name": "Land Rover Model 1",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Land Rover Model 2",
+                "engine": "Electric"
+            },
+            {
+                "name": "Land Rover Model 3",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Land Rover Model 4",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Land Rover Model 5",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Land Rover Model 6",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Land Rover Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Land Rover Model 8",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Land Rover Model 9",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Land Rover Model 10",
+                "engine": "3.5L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Jeep",
+        "models": [
+            {
+                "name": "Jeep Model 1",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Jeep Model 2",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Jeep Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Jeep Model 4",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Jeep Model 5",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Jeep Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Jeep Model 7",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Jeep Model 8",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Jeep Model 9",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Jeep Model 10",
+                "engine": "6.2L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Dodge",
+        "models": [
+            {
+                "name": "Dodge Model 1",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Dodge Model 2",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Dodge Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Dodge Model 4",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Dodge Model 5",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Dodge Model 6",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Dodge Model 7",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Dodge Model 8",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Dodge Model 9",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Dodge Model 10",
+                "engine": "5.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Chrysler",
+        "models": [
+            {
+                "name": "Chrysler Model 1",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Chrysler Model 2",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Chrysler Model 3",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Chrysler Model 4",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Chrysler Model 5",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Chrysler Model 6",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Chrysler Model 7",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Chrysler Model 8",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Chrysler Model 9",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Chrysler Model 10",
+                "engine": "3.5L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Ram",
+        "models": [
+            {
+                "name": "Ram Model 1",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Ram Model 2",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Ram Model 3",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Ram Model 4",
+                "engine": "Electric"
+            },
+            {
+                "name": "Ram Model 5",
+                "engine": "Electric"
+            },
+            {
+                "name": "Ram Model 6",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Ram Model 7",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Ram Model 8",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Ram Model 9",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Ram Model 10",
+                "engine": "2.0L Turbo I4"
+            }
+        ]
+    },
+    {
+        "brand": "Buick",
+        "models": [
+            {
+                "name": "Buick Model 1",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Buick Model 2",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Buick Model 3",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Buick Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Buick Model 5",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Buick Model 6",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Buick Model 7",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Buick Model 8",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Buick Model 9",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Buick Model 10",
+                "engine": "1.0L Turbo I3"
+            }
+        ]
+    },
+    {
+        "brand": "GMC",
+        "models": [
+            {
+                "name": "GMC Model 1",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "GMC Model 2",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "GMC Model 3",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "GMC Model 4",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "GMC Model 5",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "GMC Model 6",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "GMC Model 7",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "GMC Model 8",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "GMC Model 9",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "GMC Model 10",
+                "engine": "2.5L I4"
+            }
+        ]
+    },
+    {
+        "brand": "Cadillac",
+        "models": [
+            {
+                "name": "Cadillac Model 1",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Cadillac Model 2",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Cadillac Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Cadillac Model 4",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Cadillac Model 5",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Cadillac Model 6",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Cadillac Model 7",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Cadillac Model 8",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Cadillac Model 9",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Cadillac Model 10",
+                "engine": "5.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Acura",
+        "models": [
+            {
+                "name": "Acura Model 1",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Acura Model 2",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Acura Model 3",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Acura Model 4",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Acura Model 5",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Acura Model 6",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Acura Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Acura Model 8",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Acura Model 9",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Acura Model 10",
+                "engine": "1.0L Turbo I3"
+            }
+        ]
+    },
+    {
+        "brand": "Infiniti",
+        "models": [
+            {
+                "name": "Infiniti Model 1",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Infiniti Model 2",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Infiniti Model 3",
+                "engine": "Electric"
+            },
+            {
+                "name": "Infiniti Model 4",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Infiniti Model 5",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Infiniti Model 6",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Infiniti Model 7",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Infiniti Model 8",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Infiniti Model 9",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Infiniti Model 10",
+                "engine": "4.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Mitsubishi",
+        "models": [
+            {
+                "name": "Mitsubishi Model 1",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Mitsubishi Model 2",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Mitsubishi Model 3",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Mitsubishi Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Mitsubishi Model 5",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Mitsubishi Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Mitsubishi Model 7",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Mitsubishi Model 8",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Mitsubishi Model 9",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Mitsubishi Model 10",
+                "engine": "2.5L I4"
+            }
+        ]
+    },
+    {
+        "brand": "Mini",
+        "models": [
+            {
+                "name": "Mini Model 1",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Mini Model 2",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Mini Model 3",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Mini Model 4",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Mini Model 5",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Mini Model 6",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Mini Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Mini Model 8",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Mini Model 9",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Mini Model 10",
+                "engine": "1.5L Turbo I4"
+            }
+        ]
+    },
+    {
+        "brand": "Alfa Romeo",
+        "models": [
+            {
+                "name": "Alfa Romeo Model 1",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Alfa Romeo Model 2",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Alfa Romeo Model 3",
+                "engine": "Electric"
+            },
+            {
+                "name": "Alfa Romeo Model 4",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Alfa Romeo Model 5",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Alfa Romeo Model 6",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Alfa Romeo Model 7",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Alfa Romeo Model 8",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Alfa Romeo Model 9",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Alfa Romeo Model 10",
+                "engine": "4.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Fiat",
+        "models": [
+            {
+                "name": "Fiat Model 1",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Fiat Model 2",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Fiat Model 3",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Fiat Model 4",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Fiat Model 5",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Fiat Model 6",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Fiat Model 7",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Fiat Model 8",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Fiat Model 9",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Fiat Model 10",
+                "engine": "5.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Peugeot",
+        "models": [
+            {
+                "name": "Peugeot Model 1",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Peugeot Model 2",
+                "engine": "Electric"
+            },
+            {
+                "name": "Peugeot Model 3",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Peugeot Model 4",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Peugeot Model 5",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Peugeot Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Peugeot Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Peugeot Model 8",
+                "engine": "Electric"
+            },
+            {
+                "name": "Peugeot Model 9",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Peugeot Model 10",
+                "engine": "4.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Renault",
+        "models": [
+            {
+                "name": "Renault Model 1",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Renault Model 2",
+                "engine": "Electric"
+            },
+            {
+                "name": "Renault Model 3",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Renault Model 4",
+                "engine": "Electric"
+            },
+            {
+                "name": "Renault Model 5",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Renault Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Renault Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Renault Model 8",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Renault Model 9",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Renault Model 10",
+                "engine": "4.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Citroen",
+        "models": [
+            {
+                "name": "Citroen Model 1",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Citroen Model 2",
+                "engine": "Electric"
+            },
+            {
+                "name": "Citroen Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Citroen Model 4",
+                "engine": "Electric"
+            },
+            {
+                "name": "Citroen Model 5",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Citroen Model 6",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Citroen Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Citroen Model 8",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Citroen Model 9",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Citroen Model 10",
+                "engine": "2.5L I4"
+            }
+        ]
+    },
+    {
+        "brand": "Skoda",
+        "models": [
+            {
+                "name": "Skoda Model 1",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Skoda Model 2",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Skoda Model 3",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Skoda Model 4",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Skoda Model 5",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Skoda Model 6",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Skoda Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Skoda Model 8",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Skoda Model 9",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Skoda Model 10",
+                "engine": "6.2L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Seat",
+        "models": [
+            {
+                "name": "Seat Model 1",
+                "engine": "Electric"
+            },
+            {
+                "name": "Seat Model 2",
+                "engine": "Electric"
+            },
+            {
+                "name": "Seat Model 3",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Seat Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Seat Model 5",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Seat Model 6",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Seat Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Seat Model 8",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Seat Model 9",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Seat Model 10",
+                "engine": "Electric"
+            }
+        ]
+    },
+    {
+        "brand": "Opel",
+        "models": [
+            {
+                "name": "Opel Model 1",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Opel Model 2",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Opel Model 3",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Opel Model 4",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Opel Model 5",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Opel Model 6",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Opel Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Opel Model 8",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Opel Model 9",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Opel Model 10",
+                "engine": "4.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Suzuki",
+        "models": [
+            {
+                "name": "Suzuki Model 1",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Suzuki Model 2",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Suzuki Model 3",
+                "engine": "Electric"
+            },
+            {
+                "name": "Suzuki Model 4",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Suzuki Model 5",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Suzuki Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Suzuki Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Suzuki Model 8",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Suzuki Model 9",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Suzuki Model 10",
+                "engine": "5.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Maserati",
+        "models": [
+            {
+                "name": "Maserati Model 1",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Maserati Model 2",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Maserati Model 3",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Maserati Model 4",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Maserati Model 5",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Maserati Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Maserati Model 7",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Maserati Model 8",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Maserati Model 9",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Maserati Model 10",
+                "engine": "3.5L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Ferrari",
+        "models": [
+            {
+                "name": "Ferrari Model 1",
+                "engine": "Electric"
+            },
+            {
+                "name": "Ferrari Model 2",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Ferrari Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Ferrari Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Ferrari Model 5",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Ferrari Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Ferrari Model 7",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Ferrari Model 8",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Ferrari Model 9",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Ferrari Model 10",
+                "engine": "6.2L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Lamborghini",
+        "models": [
+            {
+                "name": "Lamborghini Model 1",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Lamborghini Model 2",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Lamborghini Model 3",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Lamborghini Model 4",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Lamborghini Model 5",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Lamborghini Model 6",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Lamborghini Model 7",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Lamborghini Model 8",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Lamborghini Model 9",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Lamborghini Model 10",
+                "engine": "5.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Aston Martin",
+        "models": [
+            {
+                "name": "Aston Martin Model 1",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Aston Martin Model 2",
+                "engine": "Electric"
+            },
+            {
+                "name": "Aston Martin Model 3",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Aston Martin Model 4",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Aston Martin Model 5",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Aston Martin Model 6",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Aston Martin Model 7",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Aston Martin Model 8",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Aston Martin Model 9",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Aston Martin Model 10",
+                "engine": "3.0L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Bentley",
+        "models": [
+            {
+                "name": "Bentley Model 1",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Bentley Model 2",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Bentley Model 3",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Bentley Model 4",
+                "engine": "Electric"
+            },
+            {
+                "name": "Bentley Model 5",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Bentley Model 6",
+                "engine": "Electric"
+            },
+            {
+                "name": "Bentley Model 7",
+                "engine": "Electric"
+            },
+            {
+                "name": "Bentley Model 8",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Bentley Model 9",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Bentley Model 10",
+                "engine": "2.5L I4"
+            }
+        ]
+    },
+    {
+        "brand": "Rolls-Royce",
+        "models": [
+            {
+                "name": "Rolls-Royce Model 1",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Rolls-Royce Model 2",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Rolls-Royce Model 3",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Rolls-Royce Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Rolls-Royce Model 5",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Rolls-Royce Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Rolls-Royce Model 7",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Rolls-Royce Model 8",
+                "engine": "Electric"
+            },
+            {
+                "name": "Rolls-Royce Model 9",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Rolls-Royce Model 10",
+                "engine": "2.5L I4"
+            }
+        ]
+    },
+    {
+        "brand": "McLaren",
+        "models": [
+            {
+                "name": "McLaren Model 1",
+                "engine": "Electric"
+            },
+            {
+                "name": "McLaren Model 2",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "McLaren Model 3",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "McLaren Model 4",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "McLaren Model 5",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "McLaren Model 6",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "McLaren Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "McLaren Model 8",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "McLaren Model 9",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "McLaren Model 10",
+                "engine": "5.0L V8"
+            }
+        ]
+    },
+    {
+        "brand": "Bugatti",
+        "models": [
+            {
+                "name": "Bugatti Model 1",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Bugatti Model 2",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Bugatti Model 3",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Bugatti Model 4",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Bugatti Model 5",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Bugatti Model 6",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Bugatti Model 7",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Bugatti Model 8",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Bugatti Model 9",
+                "engine": "Electric"
+            },
+            {
+                "name": "Bugatti Model 10",
+                "engine": "1.0L Turbo I3"
+            }
+        ]
+    },
+    {
+        "brand": "Pagani",
+        "models": [
+            {
+                "name": "Pagani Model 1",
+                "engine": "Electric"
+            },
+            {
+                "name": "Pagani Model 2",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Pagani Model 3",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Pagani Model 4",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Pagani Model 5",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Pagani Model 6",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Pagani Model 7",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Pagani Model 8",
+                "engine": "Electric"
+            },
+            {
+                "name": "Pagani Model 9",
+                "engine": "2.5L I4"
+            },
+            {
+                "name": "Pagani Model 10",
+                "engine": "1.0L Turbo I3"
+            }
+        ]
+    },
+    {
+        "brand": "Koenigsegg",
+        "models": [
+            {
+                "name": "Koenigsegg Model 1",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Koenigsegg Model 2",
+                "engine": "Electric"
+            },
+            {
+                "name": "Koenigsegg Model 3",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Koenigsegg Model 4",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Koenigsegg Model 5",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Koenigsegg Model 6",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Koenigsegg Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Koenigsegg Model 8",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Koenigsegg Model 9",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Koenigsegg Model 10",
+                "engine": "3.5L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Rivian",
+        "models": [
+            {
+                "name": "Rivian Model 1",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Rivian Model 2",
+                "engine": "5.0L V8"
+            },
+            {
+                "name": "Rivian Model 3",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Rivian Model 4",
+                "engine": "3.5L V6"
+            },
+            {
+                "name": "Rivian Model 5",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Rivian Model 6",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Rivian Model 7",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Rivian Model 8",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Rivian Model 9",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Rivian Model 10",
+                "engine": "3.0L V6"
+            }
+        ]
+    },
+    {
+        "brand": "Lucid",
+        "models": [
+            {
+                "name": "Lucid Model 1",
+                "engine": "1.0L Turbo I3"
+            },
+            {
+                "name": "Lucid Model 2",
+                "engine": "6.2L V8"
+            },
+            {
+                "name": "Lucid Model 3",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Lucid Model 4",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Lucid Model 5",
+                "engine": "3.0L V6"
+            },
+            {
+                "name": "Lucid Model 6",
+                "engine": "1.5L Turbo I4"
+            },
+            {
+                "name": "Lucid Model 7",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Lucid Model 8",
+                "engine": "2.0L Turbo I4"
+            },
+            {
+                "name": "Lucid Model 9",
+                "engine": "4.0L V8"
+            },
+            {
+                "name": "Lucid Model 10",
+                "engine": "Electric"
+            }
+        ]
+    }
+]

@@ -52,6 +52,17 @@ class _SignUpPageState extends State<SignUpPage> {
         'engineType': '',
       });
 
+      // Create an empty document in the logs subcollection
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .collection('logs')
+          .add({
+        'kilometers': 0,
+        'liters': 0,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Account created successfully!'),
