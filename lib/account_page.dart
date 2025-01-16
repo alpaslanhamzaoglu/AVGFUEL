@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'fuel_log_screen.dart'; // Import the FuelLogScreen
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -19,11 +21,13 @@ class _AccountPageState extends State<AccountPage> {
   List<String> _brands = [];
   List<String> _models = [];
   List<String> _engines = [];
+  Map<String, dynamic>? _carDetails;
 
   @override
   void initState() {
     super.initState();
     _loadBrands();
+    _loadCarDetails();
   }
 
   @override
@@ -110,6 +114,35 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  Future<void> _loadCarDetails() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          final data = doc.data();
+          if (data != null) {
+            setState(() {
+              _carDetails = data;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading car details: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   Future<void> _selectYear(BuildContext context) async {
     final DateTime now = DateTime.now();
     final DateTime? picked = await showDialog<DateTime>(
@@ -135,8 +168,92 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  Future<void> _saveCarDetails() async {
+    final carYear = _carYearController.text.trim();
+
+    if (_selectedBrand == null || _selectedModel == null || _selectedEngine == null || carYear.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All fields are required!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'carBrand': _selectedBrand,
+          'carModel': _selectedModel,
+          'carYear': DateTime(int.parse(carYear)),
+          'engineType': _selectedEngine,
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Car details saved successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Clear the controllers after saving the details
+          _carYearController.clear();
+          setState(() {
+            _selectedBrand = null;
+            _selectedModel = null;
+            _selectedEngine = null;
+            _carDetails = {
+              'carBrand': _selectedBrand,
+              'carModel': _selectedModel,
+              'carYear': DateTime(int.parse(carYear)),
+              'engineType': _selectedEngine,
+            };
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving car details: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   void _navigateToLogScreen(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/fuel_log');
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const FuelLogScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(-1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+      ),
+    );
   }
 
   void _logout() async {
@@ -234,11 +351,32 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      // Save details or perform other actions
-                    },
+                    onPressed: _saveCarDetails,
                     child: const Text('Save Details'),
                   ),
+                  const SizedBox(height: 24),
+                  if (_carDetails != null)
+                    Card(
+                      elevation: 4,
+                      margin: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Car Details:',
+                              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            Text('Brand: ${_carDetails!['carBrand']}', style: const TextStyle(fontSize: 18)),
+                            Text('Model: ${_carDetails!['carModel']}', style: const TextStyle(fontSize: 18)),
+                            Text('Engine: ${_carDetails!['engineType']}', style: const TextStyle(fontSize: 18)),
+                            Text('Year: ${(_carDetails!['carYear'] is Timestamp) ? (_carDetails!['carYear'] as Timestamp).toDate().year : _carDetails!['carYear']}', style: const TextStyle(fontSize: 18)),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
       ),
