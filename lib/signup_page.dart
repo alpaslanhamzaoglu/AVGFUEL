@@ -177,7 +177,7 @@ class _SignUpPageState extends State<SignUpPage> {
         'createdAt': FieldValue.serverTimestamp(),
         'carBrand': _selectedBrand,
         'carModel': _selectedModel,
-        'carYear': DateTime(int.parse(carYear)),
+        'carYear': int.parse(carYear),
         'engineType': _selectedEngine,
       });
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'fuel_log_screen.dart'; // Import the FuelLogScreen
+import 'fuel_log_screen.dart'; 
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -188,12 +188,23 @@ class _AccountPageState extends State<AccountPage> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'carBrand': _selectedBrand,
-          'carModel': _selectedModel,
-          'carYear': DateTime(int.parse(carYear)),
-          'engineType': _selectedEngine,
-        });
+        final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final doc = await docRef.get();
+        if (doc.exists) {
+          await docRef.update({
+            'carBrand': _selectedBrand,
+            'carModel': _selectedModel,
+            'carYear': int.parse(carYear),
+            'engineType': _selectedEngine,
+          });
+        } else {
+          await docRef.set({
+            'carBrand': _selectedBrand,
+            'carModel': _selectedModel,
+            'carYear': int.parse(carYear),
+            'engineType': _selectedEngine,
+          });
+        }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -204,15 +215,15 @@ class _AccountPageState extends State<AccountPage> {
           // Clear the controllers after saving the details
           _carYearController.clear();
           setState(() {
-            _selectedBrand = null;
-            _selectedModel = null;
-            _selectedEngine = null;
             _carDetails = {
               'carBrand': _selectedBrand,
               'carModel': _selectedModel,
-              'carYear': DateTime(int.parse(carYear)),
+              'carYear': int.parse(carYear),
               'engineType': _selectedEngine,
             };
+            _selectedBrand = null;
+            _selectedModel = null;
+            _selectedEngine = null;
           });
         }
       }
@@ -372,7 +383,7 @@ class _AccountPageState extends State<AccountPage> {
                             Text('Brand: ${_carDetails!['carBrand']}', style: const TextStyle(fontSize: 18)),
                             Text('Model: ${_carDetails!['carModel']}', style: const TextStyle(fontSize: 18)),
                             Text('Engine: ${_carDetails!['engineType']}', style: const TextStyle(fontSize: 18)),
-                            Text('Year: ${(_carDetails!['carYear'] is Timestamp) ? (_carDetails!['carYear'] as Timestamp).toDate().year : _carDetails!['carYear']}', style: const TextStyle(fontSize: 18)),
+                            Text('Year: ${_carDetails!['carYear']}', style: const TextStyle(fontSize: 18)),
                           ],
                         ),
                       ),
