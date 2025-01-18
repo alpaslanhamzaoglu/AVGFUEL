@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'forum_page.dart'; // Import the forum page
 
 class FuelLogScreen extends StatefulWidget {
   const FuelLogScreen({super.key});
@@ -95,6 +96,12 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fuel Tracker'),
+        leading: IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () {
+            Navigator.pushNamed(context, '/forum_page');
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle),
@@ -194,6 +201,8 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   void dispose() {
     _kmFocusNode.dispose();
     _litersFocusNode.dispose();
+    _kmController.dispose();
+    _litersController.dispose();
     super.dispose();
   }
 }
