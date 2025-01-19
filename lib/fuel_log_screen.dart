@@ -13,10 +13,15 @@ class FuelLogScreen extends StatefulWidget {
 class FuelLogScreenState extends State<FuelLogScreen> {
   final TextEditingController _kmController = TextEditingController();
   final TextEditingController _litersController = TextEditingController();
+  final TextEditingController _peopleController = TextEditingController();
+  final TextEditingController _totalFuelController = TextEditingController();
   final FocusNode _kmFocusNode = FocusNode();
   final FocusNode _litersFocusNode = FocusNode();
+  final FocusNode _peopleFocusNode = FocusNode();
+  final FocusNode _totalFuelFocusNode = FocusNode();
   final List<Map<String, double>> _logs = [];
   double _averageConsumption = 0.0;
+  double _averageFuelPerPerson = 0.0;
 
   @override
   void initState() {
@@ -89,6 +94,21 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     });
   }
 
+  void _calculateAverageFuelPerPerson() {
+    final double? totalFuel = double.tryParse(_totalFuelController.text);
+    final int? people = int.tryParse(_peopleController.text);
+
+    if (totalFuel != null && people != null && people > 0) {
+      setState(() {
+        _averageFuelPerPerson = totalFuel / people;
+      });
+    } else {
+      setState(() {
+        _averageFuelPerPerson = 0.0;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -154,6 +174,35 @@ class FuelLogScreenState extends State<FuelLogScreen> {
               textAlign: TextAlign.center,
             ),
             const Divider(),
+            TextField(
+              key: const ValueKey('peopleTextField'),
+              controller: _peopleController,
+              keyboardType: TextInputType.number,
+              focusNode: _peopleFocusNode,
+              decoration: const InputDecoration(labelText: 'Number of People'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              key: const ValueKey('totalFuelTextField'),
+              controller: _totalFuelController,
+              keyboardType: TextInputType.number,
+              focusNode: _totalFuelFocusNode,
+              decoration: const InputDecoration(labelText: 'Total Fuel Amount (L)'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _calculateAverageFuelPerPerson,
+              child: const Text('Calculate Average Fuel Per Person'),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _averageFuelPerPerson > 0
+                  ? 'Average Fuel Per Person: ${_averageFuelPerPerson.toStringAsFixed(2)} L'
+                  : 'Enter the number of people and total fuel amount to calculate.',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const Divider(),
             Expanded(
               child: user != null
                   ? StreamBuilder<QuerySnapshot>(
@@ -201,8 +250,12 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   void dispose() {
     _kmFocusNode.dispose();
     _litersFocusNode.dispose();
+    _peopleFocusNode.dispose();
+    _totalFuelFocusNode.dispose();
     _kmController.dispose();
     _litersController.dispose();
+    _peopleController.dispose();
+    _totalFuelController.dispose();
     super.dispose();
   }
 }
