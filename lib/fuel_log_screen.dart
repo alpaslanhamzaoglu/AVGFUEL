@@ -109,6 +109,28 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     }
   }
 
+  void _navigateToForumPage(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const ForumPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0.0, 1.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -119,7 +141,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
         leading: IconButton(
           icon: const Icon(Icons.add),
           onPressed: () {
-            Navigator.pushNamed(context, '/forum_page');
+            _navigateToForumPage(context);
           },
         ),
         actions: [
