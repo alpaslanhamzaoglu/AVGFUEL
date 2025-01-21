@@ -22,6 +22,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   final List<Map<String, double>> _logs = [];
   double _averageConsumption = 0.0;
   double _averageFuelPerPerson = 0.0;
+  String? _selectedVehicleId;
 
   @override
   void initState() {
@@ -35,6 +36,20 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      _loadVehicles(user.uid);
+    }
+  }
+
+  Future<void> _loadVehicles(String userId) async {
+    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null && data['vehicles'] != null) {
+        setState(() {
+          _selectedVehicleId = data['vehicles'][0]['id'];
+        });
+      }
     }
   }
 
@@ -67,7 +82,11 @@ class FuelLogScreenState extends State<FuelLogScreen> {
           'kilometers': kilometers,
           'liters': liters,
           'timestamp': FieldValue.serverTimestamp(),
+          'vehicleId': _selectedVehicleId,
         });
+
+        // Update average consumption in the vehicle
+        await _updateAverageConsumption(user.uid);
       }
     }
   }
@@ -91,6 +110,52 @@ class FuelLogScreenState extends State<FuelLogScreen> {
 
     setState(() {
       _averageConsumption = totalLiters / (totalDistance / 100);
+    });
+  }
+
+  Future<void> _updateAverageConsumption(String userId) async {
+    final logsSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('logs')
+        .where('vehicleId', isEqualTo: _selectedVehicleId)
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    if (logsSnapshot.docs.length < 2) {
+      return;
+    }
+
+    double totalDistance = 0.0;
+    double totalLiters = 0.0;
+
+    for (int i = 1; i < logsSnapshot.docs.length; i++) {
+      final log = logsSnapshot.docs[i].data();
+      final previousLog = logsSnapshot.docs[i - 1].data();
+      final double distance = log['kilometers'] - previousLog['kilometers'];
+      totalDistance += distance;
+      totalLiters += log['liters'];
+    }
+
+    final averageConsumption = totalLiters / (totalDistance / 100);
+
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    final userData = userDoc.data();
+    if (userData != null && userData['vehicles'] != null) {
+      final vehicles = List<Map<String, dynamic>>.from(userData['vehicles']);
+      for (var vehicle in vehicles) {
+        if (vehicle['id'] == _selectedVehicleId) {
+          vehicle['averageConsumption'] = averageConsumption;
+          break;
+        }
+      }
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'vehicles': vehicles,
+      });
+    }
+
+    setState(() {
+      _averageConsumption = averageConsumption;
     });
   }
 
@@ -232,6 +297,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
                           .collection('users')
                           .doc(user.uid)
                           .collection('logs')
+                          .where('vehicleId', isEqualTo: _selectedVehicleId)
                           .orderBy('timestamp', descending: true)
                           .snapshots(),
                       builder: (context, snapshot) {

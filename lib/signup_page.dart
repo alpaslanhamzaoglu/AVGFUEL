@@ -168,6 +168,14 @@ class _SignUpPageState extends State<SignUpPage> {
           .createUserWithEmailAndPassword(email: email, password: password);
 
       // Save user details to Firestore
+      final newVehicle = {
+        'carBrand': _selectedBrand,
+        'carModel': _selectedModel,
+        'carYear': int.parse(carYear),
+        'engineType': _selectedEngine,
+        'averageConsumption': 0.0, // Initialize average consumption
+      };
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user?.uid)
@@ -175,21 +183,7 @@ class _SignUpPageState extends State<SignUpPage> {
         'username': username,
         'email': email,
         'createdAt': FieldValue.serverTimestamp(),
-        'carBrand': _selectedBrand,
-        'carModel': _selectedModel,
-        'carYear': int.parse(carYear),
-        'engineType': _selectedEngine,
-      });
-
-      // Create an empty document in the logs subcollection
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .collection('logs')
-          .add({
-        'kilometers': 0,
-        'liters': 0,
-        'timestamp': FieldValue.serverTimestamp(),
+        'vehicles': [newVehicle],
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

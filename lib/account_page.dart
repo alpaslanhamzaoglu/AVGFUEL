@@ -21,13 +21,13 @@ class _AccountPageState extends State<AccountPage> {
   List<String> _brands = [];
   List<String> _models = [];
   List<String> _engines = [];
-  Map<String, dynamic>? _carDetails;
+  List<Map<String, dynamic>> _vehicles = [];
 
   @override
   void initState() {
     super.initState();
     _loadBrands();
-    _loadCarDetails();
+    _loadVehicles();
   }
 
   @override
@@ -114,7 +114,7 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
-  Future<void> _loadCarDetails() async {
+  Future<void> _loadVehicles() async {
     setState(() {
       _isLoading = true;
     });
@@ -125,16 +125,16 @@ class _AccountPageState extends State<AccountPage> {
         final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
         if (doc.exists) {
           final data = doc.data();
-          if (data != null) {
+          if (data != null && data['vehicles'] != null) {
             setState(() {
-              _carDetails = data;
+              _vehicles = List<Map<String, dynamic>>.from(data['vehicles']);
             });
           }
         }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading car details: $e')),
+        SnackBar(content: Text('Error loading vehicles: $e')),
       );
     } finally {
       setState(() {
@@ -168,7 +168,7 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
-  Future<void> _saveCarDetails() async {
+  Future<void> _saveVehicle() async {
     final carYear = _carYearController.text.trim();
 
     if (_selectedBrand == null || _selectedModel == null || _selectedEngine == null || carYear.isEmpty) {
@@ -188,39 +188,30 @@ class _AccountPageState extends State<AccountPage> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-        final doc = await docRef.get();
-        if (doc.exists) {
-          await docRef.update({
-            'carBrand': _selectedBrand,
-            'carModel': _selectedModel,
-            'carYear': int.parse(carYear),
-            'engineType': _selectedEngine,
-          });
-        } else {
-          await docRef.set({
-            'carBrand': _selectedBrand,
-            'carModel': _selectedModel,
-            'carYear': int.parse(carYear),
-            'engineType': _selectedEngine,
-          });
-        }
+        final newVehicle = {
+          'id': DateTime.now().millisecondsSinceEpoch.toString(), // Unique ID for the vehicle
+          'carBrand': _selectedBrand,
+          'carModel': _selectedModel,
+          'carYear': int.parse(carYear),
+          'engineType': _selectedEngine,
+          'averageConsumption': 0.0, // Initialize average consumption
+        };
+        _vehicles.add(newVehicle);
+
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'vehicles': _vehicles,
+        });
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Car details saved successfully!'),
+              content: Text('Vehicle saved successfully!'),
               backgroundColor: Colors.green,
             ),
           );
           // Clear the controllers after saving the details
           _carYearController.clear();
           setState(() {
-            _carDetails = {
-              'carBrand': _selectedBrand,
-              'carModel': _selectedModel,
-              'carYear': int.parse(carYear),
-              'engineType': _selectedEngine,
-            };
             _selectedBrand = null;
             _selectedModel = null;
             _selectedEngine = null;
@@ -231,7 +222,7 @@ class _AccountPageState extends State<AccountPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving car details: $e'),
+            content: Text('Error saving vehicle: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -362,30 +353,39 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _saveCarDetails,
-                    child: const Text('Save Details'),
+                    onPressed: _saveVehicle,
+                    child: const Text('Save Vehicle'),
                   ),
                   const SizedBox(height: 24),
-                  if (_carDetails != null)
-                    Card(
-                      elevation: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Car Details:',
-                              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  if (_vehicles.isNotEmpty)
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _vehicles.length,
+                        itemBuilder: (context, index) {
+                          final vehicle = _vehicles[index];
+                          return Card(
+                            elevation: 4,
+                            margin: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Vehicle Details:',
+                                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text('Brand: ${vehicle['carBrand']}', style: const TextStyle(fontSize: 18)),
+                                  Text('Model: ${vehicle['carModel']}', style: const TextStyle(fontSize: 18)),
+                                  Text('Engine: ${vehicle['engineType']}', style: const TextStyle(fontSize: 18)),
+                                  Text('Year: ${vehicle['carYear']}', style: const TextStyle(fontSize: 18)),
+                                  Text('Average Consumption: ${vehicle['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            Text('Brand: ${_carDetails!['carBrand']}', style: const TextStyle(fontSize: 18)),
-                            Text('Model: ${_carDetails!['carModel']}', style: const TextStyle(fontSize: 18)),
-                            Text('Engine: ${_carDetails!['engineType']}', style: const TextStyle(fontSize: 18)),
-                            Text('Year: ${_carDetails!['carYear']}', style: const TextStyle(fontSize: 18)),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ),
                 ],
