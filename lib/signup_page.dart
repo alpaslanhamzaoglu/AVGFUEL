@@ -169,6 +169,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
       // Save user details to Firestore
       final newVehicle = {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(), // Unique ID for the vehicle
         'carBrand': _selectedBrand,
         'carModel': _selectedModel,
         'carYear': int.parse(carYear),
