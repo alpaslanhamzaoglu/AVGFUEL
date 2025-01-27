@@ -13,11 +13,17 @@ class FuelLogScreen extends StatefulWidget {
 class FuelLogScreenState extends State<FuelLogScreen> {
   final TextEditingController _kmController = TextEditingController();
   final TextEditingController _litersController = TextEditingController();
+  final TextEditingController _lastMaintenanceController = TextEditingController();
+  final TextEditingController _nextMaintenanceController = TextEditingController();
   final FocusNode _kmFocusNode = FocusNode();
   final FocusNode _litersFocusNode = FocusNode();
+  final FocusNode _lastMaintenanceFocusNode = FocusNode();
+  final FocusNode _nextMaintenanceFocusNode = FocusNode();
   final List<Map<String, double>> _logs = [];
   double _averageConsumption = 0.0;
   String? _selectedVehicleId;
+  bool _switchValue = false;
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -32,18 +38,18 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     if (user == null) {
       Navigator.pushReplacementNamed(context, '/login');
     } else {
-      _loadVehicles(user.uid);
+      _loadVehicle(user.uid);
     }
   }
 
-  Future<void> _loadVehicles(String userId) async {
+  Future<void> _loadVehicle(String userId) async {
     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
     if (doc.exists) {
       final data = doc.data();
-      if (data != null && data['vehicles'] != null) {
+      if (data != null && data['vehicle'] != null) {
         setState(() {
-          _selectedVehicleId = data['vehicles'][0]['id'];
-          _averageConsumption = data['vehicles'][0]['averageConsumption'];
+          _selectedVehicleId = data['vehicle']['id'];
+          _averageConsumption = data['vehicle']['averageConsumption'];
         });
       }
     }
@@ -88,7 +94,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   }
 
   void _calculateAverageConsumption() {
-    if (_logs.isEmpty) {
+    if (_logs.length < 2) {
       setState(() {
         _averageConsumption = 0.0;
       });
@@ -99,16 +105,14 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     double totalLiters = 0.0;
 
     for (int i = 1; i < _logs.length; i++) {
-      final double distance = _logs[i]['kilometers']! - _logs[i - 1]['kilometers']!;
+      final double distance = (_logs[i]['kilometers']! - _logs[i - 1]['kilometers']!).abs();
       totalDistance += distance;
       totalLiters += _logs[i]['liters']!;
     }
 
-    if (totalDistance > 0) {
-      setState(() {
-        _averageConsumption = (totalLiters / totalDistance) * 100;
-      });
-    }
+    setState(() {
+      _averageConsumption = (totalLiters / totalDistance) * 100;
+    });
   }
 
   Future<void> _updateAverageConsumption(String userId) async {
@@ -117,10 +121,13 @@ class FuelLogScreenState extends State<FuelLogScreen> {
         .doc(userId)
         .collection('logs')
         .where('vehicleId', isEqualTo: _selectedVehicleId)
-        .orderBy('timestamp', descending: true)
+        .orderBy('timestamp')
         .get();
 
-    if (logsSnapshot.docs.isEmpty) {
+    if (logsSnapshot.docs.length < 2) {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'vehicle.averageConsumption': 0.0,
+      });
       setState(() {
         _averageConsumption = 0.0;
       });
@@ -133,33 +140,20 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     for (int i = 1; i < logsSnapshot.docs.length; i++) {
       final log = logsSnapshot.docs[i].data();
       final previousLog = logsSnapshot.docs[i - 1].data();
-      final double distance = log['kilometers'] - previousLog['kilometers'];
+      final double distance = (log['kilometers'] - previousLog['kilometers']).abs();
       totalDistance += distance;
       totalLiters += log['liters'];
     }
 
-    if (totalDistance > 0) {
-      final averageConsumption = (totalLiters / totalDistance) * 100;
+    final averageConsumption = (totalLiters / totalDistance) * 100;
 
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-      final userData = userDoc.data();
-      if (userData != null && userData['vehicles'] != null) {
-        final vehicles = List<Map<String, dynamic>>.from(userData['vehicles']);
-        for (var vehicle in vehicles) {
-          if (vehicle['id'] == _selectedVehicleId) {
-            vehicle['averageConsumption'] = averageConsumption;
-            break;
-          }
-        }
-        await FirebaseFirestore.instance.collection('users').doc(userId).update({
-          'vehicles': vehicles,
-        });
-      }
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({
+      'vehicle.averageConsumption': averageConsumption,
+    });
 
-      setState(() {
-        _averageConsumption = averageConsumption;
-      });
-    }
+    setState(() {
+      _averageConsumption = averageConsumption;
+    });
   }
 
   void _navigateToForumPage(BuildContext context) {
@@ -184,13 +178,46 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     );
   }
 
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != DateTime.now()) {
+      setState(() {
+        controller.text = "${picked.toLocal()}".split(' ')[0];
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fuel Tracker'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Car Details', style: TextStyle(fontSize: 16)),
+            Switch(
+              value: _switchValue,
+              onChanged: (value) {
+                setState(() {
+                  _switchValue = value;
+                  _pageController.animateToPage(
+                    value ? 1 : 0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                });
+              },
+            ),
+            const Text('Fuel Tracker', style: TextStyle(fontSize: 16)),
+          ],
+        ),
         leading: IconButton(
           icon: const Icon(Icons.add),
           onPressed: () {
@@ -208,85 +235,121 @@ class FuelLogScreenState extends State<FuelLogScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => FocusScope.of(context).unfocus(),
-              child: Column(
-                children: [
-                  TextField(
-                    key: const ValueKey('kmTextField'),
-                    controller: _kmController,
-                    keyboardType: TextInputType.number,
-                    focusNode: _kmFocusNode,
-                    decoration: const InputDecoration(labelText: 'Current Kilometers'),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    key: const ValueKey('fuelTextField'),
-                    controller: _litersController,
-                    keyboardType: TextInputType.number,
-                    focusNode: _litersFocusNode,
-                    decoration: const InputDecoration(labelText: 'Fuel Liters Purchased'),
-                  ),
-                ],
-              ),
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          _buildCarDetailsPage(),
+          _buildFuelLogPage(user),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCarDetailsPage() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          TextField(
+            controller: _lastMaintenanceController,
+            readOnly: true,
+            onTap: () => _selectDate(context, _lastMaintenanceController),
+            decoration: const InputDecoration(labelText: 'Last Maintenance'),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _nextMaintenanceController,
+            readOnly: true,
+            onTap: () => _selectDate(context, _nextMaintenanceController),
+            decoration: const InputDecoration(labelText: 'Next Maintenance'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFuelLogPage(User? user) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Column(
+              children: [
+                TextField(
+                  key: const ValueKey('kmTextField'),
+                  controller: _kmController,
+                  keyboardType: TextInputType.number,
+                  focusNode: _kmFocusNode,
+                  decoration: const InputDecoration(labelText: 'Current Kilometers'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  key: const ValueKey('fuelTextField'),
+                  controller: _litersController,
+                  keyboardType: TextInputType.number,
+                  focusNode: _litersFocusNode,
+                  decoration: const InputDecoration(labelText: 'Fuel Liters Purchased'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _addLog,
-              child: const Text('Save Log and Calculate'),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Average Consumption: ${_averageConsumption.toStringAsFixed(2)} L/100km',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const Divider(),
-            Expanded(
-              child: user != null
-                  ? StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(user.uid)
-                          .collection('logs')
-                          .where('vehicleId', isEqualTo: _selectedVehicleId)
-                          .orderBy('timestamp', descending: true)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        }
-                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return const Text(
-                            'No logs found. Please add some logs.',
-                            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-                          );
-                        }
-                        final logs = snapshot.data!.docs;
-                        return ListView.builder(
-                          itemCount: logs.length,
-                          itemBuilder: (context, index) {
-                            final log = logs[index].data() as Map<String, dynamic>;
-                            return ListTile(
-                              title: Text('Kilometers: ${log['kilometers']}'),
-                              subtitle: Text('Liters: ${log['liters']}'),
-                            );
-                          },
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _addLog,
+            child: const Text('Save Log and Calculate'),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _logs.length > 1
+                ? 'Average Consumption: ${_averageConsumption.toStringAsFixed(2)} L/100km'
+                : 'Average Consumption: ${_averageConsumption.toStringAsFixed(2)} L/100km',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const Divider(),
+          Expanded(
+            child: user != null
+                ? StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .collection('logs')
+                        .where('vehicleId', isEqualTo: _selectedVehicleId)
+                        .orderBy('timestamp', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Text(
+                          'No logs found. Please add some logs.',
+                          style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
                         );
-                      },
-                    )
-                  : const Text(
-                      'Please log in to view your logs.',
-                      style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-                    ),
-            ),
-          ],
-        ),
+                      }
+                      final logs = snapshot.data!.docs;
+                      return ListView.builder(
+                        itemCount: logs.length,
+                        itemBuilder: (context, index) {
+                          final log = logs[index].data() as Map<String, dynamic>;
+                          return ListTile(
+                            title: Text('Kilometers: ${log['kilometers']}'),
+                            subtitle: Text('Liters: ${log['liters']}'),
+                          );
+                        },
+                      );
+                    },
+                  )
+                : const Text(
+                    'Please log in to view your logs.',
+                    style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -295,8 +358,13 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   void dispose() {
     _kmFocusNode.dispose();
     _litersFocusNode.dispose();
+    _lastMaintenanceFocusNode.dispose();
+    _nextMaintenanceFocusNode.dispose();
     _kmController.dispose();
     _litersController.dispose();
+    _lastMaintenanceController.dispose();
+    _nextMaintenanceController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 }
