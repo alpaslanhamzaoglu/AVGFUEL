@@ -21,13 +21,13 @@ class _AccountPageState extends State<AccountPage> {
   List<String> _brands = [];
   List<String> _models = [];
   List<String> _engines = [];
-  List<Map<String, dynamic>> _vehicles = [];
+  Map<String, dynamic>? _vehicle;
 
   @override
   void initState() {
     super.initState();
     _loadBrands();
-    _loadVehicles();
+    _loadVehicle();
   }
 
   @override
@@ -114,7 +114,7 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
-  Future<void> _loadVehicles() async {
+  Future<void> _loadVehicle() async {
     setState(() {
       _isLoading = true;
     });
@@ -125,16 +125,16 @@ class _AccountPageState extends State<AccountPage> {
         final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
         if (doc.exists) {
           final data = doc.data();
-          if (data != null && data['vehicles'] != null) {
+          if (data != null && data['vehicle'] != null) {
             setState(() {
-              _vehicles = List<Map<String, dynamic>>.from(data['vehicles']);
+              _vehicle = data['vehicle'];
             });
           }
         }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading vehicles: $e')),
+        SnackBar(content: Text('Error loading vehicle: $e')),
       );
     } finally {
       setState(() {
@@ -189,17 +189,15 @@ class _AccountPageState extends State<AccountPage> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         final newVehicle = {
-          'id': DateTime.now().millisecondsSinceEpoch.toString(), // Unique ID for the vehicle
           'carBrand': _selectedBrand,
           'carModel': _selectedModel,
           'carYear': int.parse(carYear),
           'engineType': _selectedEngine,
           'averageConsumption': 0.0, // Initialize average consumption
         };
-        _vehicles.add(newVehicle);
 
         await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-          'vehicles': _vehicles,
+          'vehicle': newVehicle,
         });
 
         if (mounted) {
@@ -215,6 +213,7 @@ class _AccountPageState extends State<AccountPage> {
             _selectedBrand = null;
             _selectedModel = null;
             _selectedEngine = null;
+            _vehicle = newVehicle;
           });
         }
       }
@@ -357,35 +356,29 @@ class _AccountPageState extends State<AccountPage> {
                     child: const Text('Save Vehicle'),
                   ),
                   const SizedBox(height: 24),
-                  if (_vehicles.isNotEmpty)
+                  if (_vehicle != null)
                     Expanded(
-                      child: ListView.builder(
-                        itemCount: _vehicles.length,
-                        itemBuilder: (context, index) {
-                          final vehicle = _vehicles[index];
-                          return Card(
-                            elevation: 4,
-                            margin: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Vehicle Details:',
-                                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text('Brand: ${vehicle['carBrand']}', style: const TextStyle(fontSize: 18)),
-                                  Text('Model: ${vehicle['carModel']}', style: const TextStyle(fontSize: 18)),
-                                  Text('Engine: ${vehicle['engineType']}', style: const TextStyle(fontSize: 18)),
-                                  Text('Year: ${vehicle['carYear']}', style: const TextStyle(fontSize: 18)),
-                                  Text('Average Consumption: ${vehicle['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
-                                ],
+                      child: Card(
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Vehicle Details:',
+                                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                               ),
-                            ),
-                          );
-                        },
+                              const SizedBox(height: 8),
+                              Text('Brand: ${_vehicle!['carBrand']}', style: const TextStyle(fontSize: 18)),
+                              Text('Model: ${_vehicle!['carModel']}', style: const TextStyle(fontSize: 18)),
+                              Text('Engine: ${_vehicle!['engineType']}', style: const TextStyle(fontSize: 18)),
+                              Text('Year: ${_vehicle!['carYear']}', style: const TextStyle(fontSize: 18)),
+                              Text('Average Consumption: ${_vehicle!['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                 ],
