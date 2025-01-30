@@ -128,6 +128,7 @@ class _AccountPageState extends State<AccountPage> {
           if (data != null && data['vehicle'] != null) {
             setState(() {
               _vehicle = data['vehicle'];
+              _carYearController.text = _vehicle!['carYear'].toString();
             });
           }
         }

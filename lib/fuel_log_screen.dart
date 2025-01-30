@@ -15,15 +15,26 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   final TextEditingController _litersController = TextEditingController();
   final TextEditingController _lastMaintenanceController = TextEditingController();
   final TextEditingController _nextMaintenanceController = TextEditingController();
+  final TextEditingController _yearlyTaxController = TextEditingController();
+  final TextEditingController _insuranceController = TextEditingController();
+  final TextEditingController _mandatoryInsuranceController = TextEditingController();
   final FocusNode _kmFocusNode = FocusNode();
   final FocusNode _litersFocusNode = FocusNode();
   final FocusNode _lastMaintenanceFocusNode = FocusNode();
   final FocusNode _nextMaintenanceFocusNode = FocusNode();
+  final FocusNode _yearlyTaxFocusNode = FocusNode();
+  final FocusNode _insuranceFocusNode = FocusNode();
+  final FocusNode _mandatoryInsuranceFocusNode = FocusNode();
   final List<Map<String, double>> _logs = [];
   double _averageConsumption = 0.0;
   String? _selectedVehicleId;
   bool _switchValue = false;
   final PageController _pageController = PageController();
+  bool _isEditingLastMaintenance = false;
+  bool _isEditingNextMaintenance = false;
+  bool _isEditingYearlyTax = false;
+  bool _isEditingInsurance = false;
+  bool _isEditingMandatoryInsurance = false;
 
   @override
   void initState() {
@@ -50,8 +61,26 @@ class FuelLogScreenState extends State<FuelLogScreen> {
         setState(() {
           _selectedVehicleId = data['vehicle']['id'];
           _averageConsumption = data['vehicle']['averageConsumption'];
+          _lastMaintenanceController.text = data['vehicle']['lastMaintenance'] ?? '';
+          _nextMaintenanceController.text = data['vehicle']['nextMaintenance'] ?? '';
+          _yearlyTaxController.text = data['vehicle']['yearlyTax']?.toString() ?? '';
+          _insuranceController.text = data['vehicle']['insurance']?.toString() ?? '';
+          _mandatoryInsuranceController.text = data['vehicle']['mandatoryInsurance']?.toString() ?? '';
         });
       }
+    }
+  }
+
+  Future<void> _updateVehicleDetails() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && _selectedVehicleId != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'vehicle.lastMaintenance': _lastMaintenanceController.text,
+        'vehicle.nextMaintenance': _nextMaintenanceController.text,
+        'vehicle.yearlyTax': double.tryParse(_yearlyTaxController.text) ?? 0.0,
+        'vehicle.insurance': double.tryParse(_insuranceController.text) ?? 0.0,
+        'vehicle.mandatoryInsurance': double.tryParse(_mandatoryInsuranceController.text) ?? 0.0,
+      });
     }
   }
 
@@ -188,6 +217,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     if (picked != null && picked != DateTime.now()) {
       setState(() {
         controller.text = "${picked.toLocal()}".split(' ')[0];
+        _updateVehicleDetails();
       });
     }
   }
@@ -251,21 +281,114 @@ class FuelLogScreenState extends State<FuelLogScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          TextField(
+          _buildEditableField(
+            label: 'Last Maintenance',
             controller: _lastMaintenanceController,
-            readOnly: true,
+            isEditing: _isEditingLastMaintenance,
+            onEdit: () {
+              setState(() {
+                _isEditingLastMaintenance = !_isEditingLastMaintenance;
+                if (!_isEditingLastMaintenance) {
+                  _updateVehicleDetails();
+                }
+              });
+            },
             onTap: () => _selectDate(context, _lastMaintenanceController),
-            decoration: const InputDecoration(labelText: 'Last Maintenance'),
           ),
           const SizedBox(height: 8),
-          TextField(
+          _buildEditableField(
+            label: 'Next Maintenance',
             controller: _nextMaintenanceController,
-            readOnly: true,
+            isEditing: _isEditingNextMaintenance,
+            onEdit: () {
+              setState(() {
+                _isEditingNextMaintenance = !_isEditingNextMaintenance;
+                if (!_isEditingNextMaintenance) {
+                  _updateVehicleDetails();
+                }
+              });
+            },
             onTap: () => _selectDate(context, _nextMaintenanceController),
-            decoration: const InputDecoration(labelText: 'Next Maintenance'),
+          ),
+          const SizedBox(height: 8),
+          _buildEditableField(
+            label: 'Yearly Tax',
+            controller: _yearlyTaxController,
+            isEditing: _isEditingYearlyTax,
+            onEdit: () {
+              setState(() {
+                _isEditingYearlyTax = !_isEditingYearlyTax;
+                if (!_isEditingYearlyTax) {
+                  _updateVehicleDetails();
+                }
+              });
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildEditableField(
+            label: 'Insurance',
+            controller: _insuranceController,
+            isEditing: _isEditingInsurance,
+            onEdit: () {
+              setState(() {
+                _isEditingInsurance = !_isEditingInsurance;
+                if (!_isEditingInsurance) {
+                  _updateVehicleDetails();
+                }
+              });
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildEditableField(
+            label: 'Mandatory Insurance',
+            controller: _mandatoryInsuranceController,
+            isEditing: _isEditingMandatoryInsurance,
+            onEdit: () {
+              setState(() {
+                _isEditingMandatoryInsurance = !_isEditingMandatoryInsurance;
+                if (!_isEditingMandatoryInsurance) {
+                  _updateVehicleDetails();
+                }
+              });
+            },
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEditableField({
+    required String label,
+    required TextEditingController controller,
+    required bool isEditing,
+    required VoidCallback onEdit,
+    VoidCallback? onTap,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: isEditing
+              ? TextField(
+                  controller: controller,
+                  onTap: onTap,
+                  decoration: InputDecoration(labelText: label),
+                )
+              : GestureDetector(
+                  onTap: onTap,
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: controller,
+                      decoration: InputDecoration(labelText: label),
+                      readOnly: true,
+                    ),
+                  ),
+                ),
+        ),
+        IconButton(
+          icon: Icon(isEditing ? Icons.check : Icons.edit),
+          onPressed: onEdit,
+        ),
+      ],
     );
   }
 
@@ -360,10 +483,16 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     _litersFocusNode.dispose();
     _lastMaintenanceFocusNode.dispose();
     _nextMaintenanceFocusNode.dispose();
+    _yearlyTaxFocusNode.dispose();
+    _insuranceFocusNode.dispose();
+    _mandatoryInsuranceFocusNode.dispose();
     _kmController.dispose();
     _litersController.dispose();
     _lastMaintenanceController.dispose();
     _nextMaintenanceController.dispose();
+    _yearlyTaxController.dispose();
+    _insuranceController.dispose();
+    _mandatoryInsuranceController.dispose();
     _pageController.dispose();
     super.dispose();
   }
