@@ -195,6 +195,11 @@ class _AccountPageState extends State<AccountPage> {
           'carYear': int.parse(carYear),
           'engineType': _selectedEngine,
           'averageConsumption': 0.0, // Initialize average consumption
+          'lastMaintenance': '',
+          'nextMaintenance': '',
+          'yearlyTax': 0.0,
+          'insurance': 0.0,
+          'mandatoryInsurance': 0.0,
         };
 
         await FirebaseFirestore.instance.collection('users').doc(user.uid).update({

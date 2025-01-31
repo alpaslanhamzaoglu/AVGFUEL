@@ -294,6 +294,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
               });
             },
             onTap: () => _selectDate(context, _lastMaintenanceController),
+            onChanged: (value) => _updateVehicleDetails(),
           ),
           const SizedBox(height: 8),
           _buildEditableField(
@@ -309,6 +310,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
               });
             },
             onTap: () => _selectDate(context, _nextMaintenanceController),
+            onChanged: (value) => _updateVehicleDetails(),
           ),
           const SizedBox(height: 8),
           _buildEditableField(
@@ -323,6 +325,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
                 }
               });
             },
+            onChanged: (value) => _updateVehicleDetails(),
           ),
           const SizedBox(height: 8),
           _buildEditableField(
@@ -337,6 +340,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
                 }
               });
             },
+            onChanged: (value) => _updateVehicleDetails(),
           ),
           const SizedBox(height: 8),
           _buildEditableField(
@@ -351,6 +355,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
                 }
               });
             },
+            onChanged: (value) => _updateVehicleDetails(),
           ),
         ],
       ),
@@ -363,6 +368,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     required bool isEditing,
     required VoidCallback onEdit,
     VoidCallback? onTap,
+    ValueChanged<String>? onChanged,
   }) {
     return Row(
       children: [
@@ -371,6 +377,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
               ? TextField(
                   controller: controller,
                   onTap: onTap,
+                  onChanged: onChanged,
                   decoration: InputDecoration(labelText: label),
                 )
               : GestureDetector(
