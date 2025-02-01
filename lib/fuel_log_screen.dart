@@ -30,11 +30,6 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   String? _selectedVehicleId;
   bool _switchValue = false;
   final PageController _pageController = PageController();
-  bool _isEditingLastMaintenance = false;
-  bool _isEditingNextMaintenance = false;
-  bool _isEditingYearlyTax = false;
-  bool _isEditingInsurance = false;
-  bool _isEditingMandatoryInsurance = false;
 
   @override
   void initState() {
@@ -73,21 +68,27 @@ class FuelLogScreenState extends State<FuelLogScreen> {
 
   Future<void> _updateVehicleDetails() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user != null && _selectedVehicleId != null) {
+    if (user != null) {
+      FocusScope.of(context).unfocus();
       await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
         'vehicle.lastMaintenance': _lastMaintenanceController.text,
         'vehicle.nextMaintenance': _nextMaintenanceController.text,
         'vehicle.yearlyTax': double.tryParse(_yearlyTaxController.text) ?? 0.0,
         'vehicle.insurance': double.tryParse(_insuranceController.text) ?? 0.0,
         'vehicle.mandatoryInsurance': double.tryParse(_mandatoryInsuranceController.text) ?? 0.0,
+        // Add any other “vehicle.” fields if needed, matching the account page.
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Details updated successfully!'), backgroundColor: Colors.green),
+      );
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    FocusScope.of(context).requestFocus(_kmFocusNode);
+    // Remove or comment out direct focus calls:
+    // FocusScope.of(context).requestFocus(_kmFocusNode);
   }
 
   Future<void> _addLog() async {
@@ -217,7 +218,6 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     if (picked != null && picked != DateTime.now()) {
       setState(() {
         controller.text = "${picked.toLocal()}".split(' ')[0];
-        _updateVehicleDetails();
       });
     }
   }
@@ -284,78 +284,33 @@ class FuelLogScreenState extends State<FuelLogScreen> {
           _buildEditableField(
             label: 'Last Maintenance',
             controller: _lastMaintenanceController,
-            isEditing: _isEditingLastMaintenance,
-            onEdit: () {
-              setState(() {
-                _isEditingLastMaintenance = !_isEditingLastMaintenance;
-                if (!_isEditingLastMaintenance) {
-                  _updateVehicleDetails();
-                }
-              });
-            },
             onTap: () => _selectDate(context, _lastMaintenanceController),
-            onChanged: (value) => _updateVehicleDetails(),
           ),
           const SizedBox(height: 8),
           _buildEditableField(
             label: 'Next Maintenance',
             controller: _nextMaintenanceController,
-            isEditing: _isEditingNextMaintenance,
-            onEdit: () {
-              setState(() {
-                _isEditingNextMaintenance = !_isEditingNextMaintenance;
-                if (!_isEditingNextMaintenance) {
-                  _updateVehicleDetails();
-                }
-              });
-            },
             onTap: () => _selectDate(context, _nextMaintenanceController),
-            onChanged: (value) => _updateVehicleDetails(),
           ),
           const SizedBox(height: 8),
           _buildEditableField(
             label: 'Yearly Tax',
             controller: _yearlyTaxController,
-            isEditing: _isEditingYearlyTax,
-            onEdit: () {
-              setState(() {
-                _isEditingYearlyTax = !_isEditingYearlyTax;
-                if (!_isEditingYearlyTax) {
-                  _updateVehicleDetails();
-                }
-              });
-            },
-            onChanged: (value) => _updateVehicleDetails(),
           ),
           const SizedBox(height: 8),
           _buildEditableField(
             label: 'Insurance',
             controller: _insuranceController,
-            isEditing: _isEditingInsurance,
-            onEdit: () {
-              setState(() {
-                _isEditingInsurance = !_isEditingInsurance;
-                if (!_isEditingInsurance) {
-                  _updateVehicleDetails();
-                }
-              });
-            },
-            onChanged: (value) => _updateVehicleDetails(),
           ),
           const SizedBox(height: 8),
           _buildEditableField(
             label: 'Mandatory Insurance',
             controller: _mandatoryInsuranceController,
-            isEditing: _isEditingMandatoryInsurance,
-            onEdit: () {
-              setState(() {
-                _isEditingMandatoryInsurance = !_isEditingMandatoryInsurance;
-                if (!_isEditingMandatoryInsurance) {
-                  _updateVehicleDetails();
-                }
-              });
-            },
-            onChanged: (value) => _updateVehicleDetails(),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _updateVehicleDetails,
+            child: const Text('Update'),
           ),
         ],
       ),
@@ -365,37 +320,17 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   Widget _buildEditableField({
     required String label,
     required TextEditingController controller,
-    required bool isEditing,
-    required VoidCallback onEdit,
     VoidCallback? onTap,
     ValueChanged<String>? onChanged,
   }) {
-    return Row(
-      children: [
-        Expanded(
-          child: isEditing
-              ? TextField(
-                  controller: controller,
-                  onTap: onTap,
-                  onChanged: onChanged,
-                  decoration: InputDecoration(labelText: label),
-                )
-              : GestureDetector(
-                  onTap: onTap,
-                  child: AbsorbPointer(
-                    child: TextField(
-                      controller: controller,
-                      decoration: InputDecoration(labelText: label),
-                      readOnly: true,
-                    ),
-                  ),
-                ),
-        ),
-        IconButton(
-          icon: Icon(isEditing ? Icons.check : Icons.edit),
-          onPressed: onEdit,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        onTap: onTap,
+        onChanged: onChanged,
+        decoration: InputDecoration(labelText: label),
+      ),
     );
   }
 

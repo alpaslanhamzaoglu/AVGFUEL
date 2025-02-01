@@ -242,6 +242,7 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   void _navigateToLogScreen(BuildContext context) {
+    FocusScope.of(context).unfocus();
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
