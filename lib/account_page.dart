@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'fuel_log_screen.dart'; 
@@ -42,15 +40,11 @@ class _AccountPageState extends State<AccountPage> {
     });
 
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:8081/brands'));
-      if (response.statusCode == 200) {
-        final List<dynamic> brands = json.decode(response.body);
-        setState(() {
-          _brands = brands.cast<String>();
-        });
-      } else {
-        throw Exception('Failed to load brands');
-      }
+      final querySnapshot = await FirebaseFirestore.instance.collection('vehicleBrands').get();
+      final List<String> brands = querySnapshot.docs.map((doc) => doc.id).toList();
+      setState(() {
+        _brands = brands;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading brands: $e')),
@@ -68,15 +62,15 @@ class _AccountPageState extends State<AccountPage> {
     });
 
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:8081/models?brand=$brand'));
-      if (response.statusCode == 200) {
-        final List<dynamic> models = json.decode(response.body);
-        setState(() {
-          _models = models.cast<String>();
-        });
-      } else {
-        throw Exception('Failed to load models');
-      }
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('vehicleBrands')
+          .doc(brand)
+          .collection('models')
+          .get();
+      final List<String> models = querySnapshot.docs.map((doc) => doc.id).toList();
+      setState(() {
+        _models = models;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading models: $e')),
@@ -94,15 +88,17 @@ class _AccountPageState extends State<AccountPage> {
     });
 
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:8081/engines?model=$model'));
-      if (response.statusCode == 200) {
-        final List<dynamic> engines = json.decode(response.body);
-        setState(() {
-          _engines = engines.cast<String>();
-        });
-      } else {
-        throw Exception('Failed to load engines');
-      }
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('vehicleBrands')
+          .doc(_selectedBrand)
+          .collection('models')
+          .doc(model)
+          .collection('engines')
+          .get();
+      final List<String> engines = querySnapshot.docs.map((doc) => doc['name'] as String).toList();
+      setState(() {
+        _engines = engines;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading engines: $e')),

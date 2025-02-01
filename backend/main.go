@@ -1,112 +1,88 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
-	"net/http"
-	"os"
 
-	"github.com/gorilla/mux"
+	firebase "firebase.google.com/go"
+	"google.golang.org/api/option"
 )
 
-// Data structure to match your JSON dataset
-type EngineData struct {
-	Brand  string `json:"brand"`
-	Models []struct {
-		Name    string   `json:"name"`
-		Engines []string `json:"engines"`
-	} `json:"models"`
+type Vehicle struct {
+	Brand  string   `json:"brand"`
+	Models []Model  `json:"models"`
 }
 
-var automobileData []EngineData
+type Model struct {
+	Name    string   `json:"name"`
+	Engines []string `json:"engines"`
+}
 
 func main() {
-	// Load data from JSON file
-	if err := loadData("data.json"); err != nil {
-		log.Fatalf("Error loading data: %v", err)
-	}
-
-	// Set up router and routes
-	router := mux.NewRouter()
-	router.HandleFunc("/brands", getBrands).Methods("GET")
-	router.HandleFunc("/models", getModels).Methods("GET")
-	router.HandleFunc("/engines", getEngines).Methods("GET")
-
-	log.Println("Server is running on port 8081")
-	log.Fatal(http.ListenAndServe(":8081", router))
-}
-
-func loadData(filename string) error {
-	file, err := os.Open(filename)
+	// Initialize Firebase
+	ctx := context.Background()
+	conf := &firebase.Config{ProjectID: "avgfuel-aea25"}
+	opt := option.WithCredentialsFile("./serviceAccountKey.json") // Make sure this file exists
+	app, err := firebase.NewApp(ctx, conf, opt)
 	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	if err := json.NewDecoder(file).Decode(&automobileData); err != nil {
-		return err
-	}
-	return nil
-}
-
-func getBrands(w http.ResponseWriter, r *http.Request) {
-	var brands []string
-	for _, data := range automobileData {
-		brands = append(brands, data.Brand)
+		log.Fatalf("Error initializing app: %v", err)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(brands)
-}
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		log.Fatalf("Error initializing Firestore: %v", err)
+	}
+	defer client.Close()
 
-func getModels(w http.ResponseWriter, r *http.Request) {
-	brand := r.URL.Query().Get("brand")
-	if brand == "" {
-		http.Error(w, "Missing brand parameter", http.StatusBadRequest)
-		return
+	// Read JSON file
+	fileData, err := ioutil.ReadFile("../backend/data.json")
+	if err != nil {
+		log.Fatalf("Error reading file: %v", err)
 	}
 
-	var models []string
-	for _, data := range automobileData {
-		if data.Brand == brand {
-			for _, model := range data.Models {
-				models = append(models, model.Name)
+	var vehicles []Vehicle
+	err = json.Unmarshal(fileData, &vehicles)
+	if err != nil {
+		log.Fatalf("Error parsing JSON: %v", err)
+	}
+
+	// Batch write
+	for _, vehicle := range vehicles {
+		brandRef := client.Collection("vehicleBrands").Doc(vehicle.Brand) // Brand document
+
+		for _, model := range vehicle.Models {
+			modelRef := brandRef.Collection("models").Doc(model.Name) // Model subcollection
+
+			for _, engine := range model.Engines {
+				engineRef := modelRef.Collection("engines").NewDoc() // Engine subcollection
+				_, err := engineRef.Set(ctx, map[string]interface{}{
+					"name": engine,
+				})
+				if err != nil {
+					log.Fatalf("Error adding engine: %v", err)
+				}
 			}
-			break
+
+			// Add the model document with just a name field
+			_, err := modelRef.Set(ctx, map[string]interface{}{
+				"name": model.Name,
+			})
+			if err != nil {
+				log.Fatalf("Error adding model: %v", err)
+			}
+		}
+
+		// Add the brand document
+		_, err := brandRef.Set(ctx, map[string]interface{}{
+			"name": vehicle.Brand,
+		})
+		if err != nil {
+			log.Fatalf("Error adding brand: %v", err)
 		}
 	}
 
-	if len(models) == 0 {
-		http.Error(w, "Brand not found", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(models)
-}
-
-func getEngines(w http.ResponseWriter, r *http.Request) {
-	model := r.URL.Query().Get("model")
-	if model == "" {
-		http.Error(w, "Missing model parameter", http.StatusBadRequest)
-		return
-	}
-
-	var engines []string
-	for _, data := range automobileData {
-		for _, m := range data.Models {
-			if m.Name == model {
-				engines = m.Engines
-				break
-			}
-		}
-	}
-
-	if len(engines) == 0 {
-		http.Error(w, "Model not found", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(engines)
+	fmt.Println("Data upload complete!")
 }
