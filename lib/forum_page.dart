@@ -13,14 +13,18 @@ class ForumPage extends StatefulWidget {
 class _ForumPageState extends State<ForumPage> {
   final TextEditingController _textController = TextEditingController();
 
-  void _sendText() async {
+  Future<void> _sendText() async {
     final text = _textController.text.trim();
     if (text.isNotEmpty) {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        final username = userDoc.data()?['username'] ?? 'testuser';
+
         await FirebaseFirestore.instance.collection('messages').add({
           'text': text,
           'userId': user.uid,
+          'username': username,
           'timestamp': FieldValue.serverTimestamp(),
         });
         _textController.clear();
@@ -93,7 +97,7 @@ class _ForumPageState extends State<ForumPage> {
                     final message = messages[index].data() as Map<String, dynamic>;
                     return ListTile(
                       title: Text(message['text']),
-                      subtitle: Text(message['userId']),
+                      subtitle: Text(message['username']),
                     );
                   },
                 );
