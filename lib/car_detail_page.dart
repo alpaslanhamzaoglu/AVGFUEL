@@ -267,131 +267,125 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        _navigateToLogScreen(context);
-        return false;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Car Details'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => _navigateToLogScreen(context),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: _logout,
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Car Details'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => _navigateToLogScreen(context),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
-                  children: [
-                    DropdownButtonFormField<String>(
-                      value: _selectedBrand,
-                      hint: const Text('Select Brand'),
-                      items: _brands.map((String brand) {
-                        return DropdownMenuItem<String>(
-                          value: brand,
-                          child: Text(brand),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedBrand = newValue;
-                          _models = [];
-                          _engines = [];
-                          _selectedModel = null;
-                          _selectedEngine = null;
-                        });
-                        if (newValue != null) {
-                          _loadModels(newValue);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _selectedModel,
-                      hint: const Text('Select Model'),
-                      items: _models.map((String model) {
-                        return DropdownMenuItem<String>(
-                          value: model,
-                          child: Text(model),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedModel = newValue;
-                          _engines = [];
-                          _selectedEngine = null;
-                        });
-                        if (newValue != null) {
-                          _loadEngines(newValue);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _selectedEngine,
-                      hint: const Text('Select Engine'),
-                      items: _engines.map((String engine) {
-                        return DropdownMenuItem<String>(
-                          value: engine,
-                          child: Text(engine),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedEngine = newValue;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _carYearController,
-                      readOnly: true,
-                      onTap: () => _selectYear(context),
-                      decoration: const InputDecoration(labelText: 'Year of Manufacture'),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _saveVehicle,
-                      child: const Text('Save Vehicle'),
-                    ),
-                    const SizedBox(height: 24),
-                    if (_vehicle != null)
-                      Expanded(
-                        child: Card(
-                          elevation: 4,
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Vehicle Details:',
-                                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 8),
-                                Text('Brand: ${_vehicle!['carBrand']}', style: const TextStyle(fontSize: 18)),
-                                Text('Model: ${_vehicle!['carModel']}', style: const TextStyle(fontSize: 18)),
-                                Text('Engine: ${_vehicle!['engineType']}', style: const TextStyle(fontSize: 18)),
-                                Text('Year: ${_vehicle!['carYear']}', style: const TextStyle(fontSize: 18)),
-                                Text('Average Consumption: ${_vehicle!['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
-                              ],
-                            ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: _selectedBrand,
+                    hint: const Text('Select Brand'),
+                    items: _brands.map((String brand) {
+                      return DropdownMenuItem<String>(
+                        value: brand,
+                        child: Text(brand),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedBrand = newValue;
+                        _models = [];
+                        _engines = [];
+                        _selectedModel = null;
+                        _selectedEngine = null;
+                      });
+                      if (newValue != null) {
+                        _loadModels(newValue);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedModel,
+                    hint: const Text('Select Model'),
+                    items: _models.map((String model) {
+                      return DropdownMenuItem<String>(
+                        value: model,
+                        child: Text(model),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedModel = newValue;
+                        _engines = [];
+                        _selectedEngine = null;
+                      });
+                      if (newValue != null) {
+                        _loadEngines(newValue);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedEngine,
+                    hint: const Text('Select Engine'),
+                    items: _engines.map((String engine) {
+                      return DropdownMenuItem<String>(
+                        value: engine,
+                        child: Text(engine),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedEngine = newValue;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _carYearController,
+                    readOnly: true,
+                    onTap: () => _selectYear(context),
+                    decoration: const InputDecoration(labelText: 'Year of Manufacture'),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _saveVehicle,
+                    child: const Text('Save Vehicle'),
+                  ),
+                  const SizedBox(height: 24),
+                  if (_vehicle != null)
+                    Expanded(
+                      child: Card(
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Vehicle Details:',
+                                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Brand: ${_vehicle!['carBrand']}', style: const TextStyle(fontSize: 18)),
+                              Text('Model: ${_vehicle!['carModel']}', style: const TextStyle(fontSize: 18)),
+                              Text('Engine: ${_vehicle!['engineType']}', style: const TextStyle(fontSize: 18)),
+                              Text('Year: ${_vehicle!['carYear']}', style: const TextStyle(fontSize: 18)),
+                              Text('Average Consumption: ${_vehicle!['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
+                            ],
                           ),
                         ),
                       ),
-                  ],
-                ),
-        ),
+                    ),
+                ],
+              ),
       ),
     );
   }

@@ -28,8 +28,8 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   final List<Map<String, double>> _logs = [];
   double _averageConsumption = 0.0;
   String? _selectedVehicleId;
-  bool _switchValue = false;
   final PageController _pageController = PageController();
+  int _selectedPageIndex = 0;
 
   @override
   void initState() {
@@ -222,6 +222,17 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     }
   }
 
+  void _navigateToPage(int pageIndex) {
+    setState(() {
+      _selectedPageIndex = pageIndex;
+    });
+    _pageController.animateToPage(
+      pageIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -231,32 +242,39 @@ class FuelLogScreenState extends State<FuelLogScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Car Details', style: TextStyle(fontSize: 16)),
-            Switch(
-              value: _switchValue,
-              onChanged: (value) {
-                setState(() {
-                  _switchValue = value;
-                  _pageController.animateToPage(
-                    value ? 1 : 0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                });
-              },
+            TextButton(
+              onPressed: () => _navigateToPage(0),
+              child: Text(
+                'Maintenance',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: _selectedPageIndex == 0 ? Colors.black : Colors.grey[700],
+                  fontWeight: _selectedPageIndex == 0 ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
             ),
-            const Text('Fuel Tracker', style: TextStyle(fontSize: 16)),
+            TextButton(
+              onPressed: () => _navigateToPage(1),
+              child: Text(
+                'Fuel Tracker',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: _selectedPageIndex == 1 ? Colors.black : Colors.grey[700],
+                  fontWeight: _selectedPageIndex == 1 ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
           ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.add),
+          icon: Image.asset('assets/forum_icon.png'),
           onPressed: () {
             _navigateToForumPage(context);
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.account_circle),
+            icon: Image.asset('assets/car.png'),
             onPressed: () {
               // Clear focus before navigating
               FocusScope.of(context).unfocus();

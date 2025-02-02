@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'fuel_log_screen.dart'; // Main app screen
 import 'login_page.dart'; // Login screen
 import 'signup_page.dart'; // Sign up screen
-import 'account_page.dart'; // Account page
+import 'car_detail_page.dart'; // Account page
 import 'forum_page.dart'; // Forum page
 import 'firebase_options.dart'; // Firebase configuration file
 
