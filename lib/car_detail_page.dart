@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'fuel_log_screen.dart'; 
+import 'fuel_log_screen.dart';
+import 'account_page.dart'; // Import the account page
 
-class AccountPage extends StatefulWidget {
-  const AccountPage({super.key});
+class CarDetailPage extends StatefulWidget {
+  const CarDetailPage({super.key});
 
   @override
-  State<AccountPage> createState() => _AccountPageState();
+  State<CarDetailPage> createState() => _CarDetailPageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
+class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProviderStateMixin {
   final TextEditingController _carYearController = TextEditingController();
   String? _selectedBrand;
   String? _selectedModel;
   String? _selectedEngine;
   bool _isLoading = false;
+  bool _isMenuOpen = false;
+  late AnimationController _animationController;
+  late Animation<double> _opacityAnimation;
   List<String> _brands = [];
   List<String> _models = [];
   List<String> _engines = [];
@@ -26,11 +30,17 @@ class _AccountPageState extends State<AccountPage> {
     super.initState();
     _loadBrands();
     _loadVehicle();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
   }
 
   @override
   void dispose() {
     _carYearController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -124,7 +134,7 @@ class _AccountPageState extends State<AccountPage> {
           if (data != null && data['vehicle'] != null) {
             setState(() {
               _vehicle = data['vehicle'];
-              _carYearController.text = _vehicle!['carYear'].toString();
+              // Do not pre-fill any fields
             });
           }
         }
@@ -265,127 +275,221 @@ class _AccountPageState extends State<AccountPage> {
     Navigator.pushReplacementNamed(context, '/login');
   }
 
+  void _onMenuSelected(String value) {
+    setState(() {
+      _isMenuOpen = false;
+    });
+    if (value == 'Account') {
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => const AccountPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+
+            final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            final offsetAnimation = animation.drive(tween);
+
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
+        ),
+      );
+    }
+  }
+
+  void _toggleMenu() {
+    setState(() {
+      _isMenuOpen = !_isMenuOpen;
+      if (_isMenuOpen) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Car Details'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => _navigateToLogScreen(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
+    return WillPopScope(
+      onWillPop: () async {
+        _navigateToLogScreen(context);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: GestureDetector(
+            onTap: _toggleMenu,
+            child: const Text('Car Details'),
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  DropdownButtonFormField<String>(
-                    value: _selectedBrand,
-                    hint: const Text('Select Brand'),
-                    items: _brands.map((String brand) {
-                      return DropdownMenuItem<String>(
-                        value: brand,
-                        child: Text(brand),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedBrand = newValue;
-                        _models = [];
-                        _engines = [];
-                        _selectedModel = null;
-                        _selectedEngine = null;
-                      });
-                      if (newValue != null) {
-                        _loadModels(newValue);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedModel,
-                    hint: const Text('Select Model'),
-                    items: _models.map((String model) {
-                      return DropdownMenuItem<String>(
-                        value: model,
-                        child: Text(model),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedModel = newValue;
-                        _engines = [];
-                        _selectedEngine = null;
-                      });
-                      if (newValue != null) {
-                        _loadEngines(newValue);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedEngine,
-                    hint: const Text('Select Engine'),
-                    items: _engines.map((String engine) {
-                      return DropdownMenuItem<String>(
-                        value: engine,
-                        child: Text(engine),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedEngine = newValue;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _carYearController,
-                    readOnly: true,
-                    onTap: () => _selectYear(context),
-                    decoration: const InputDecoration(labelText: 'Year of Manufacture'),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _saveVehicle,
-                    child: const Text('Save Vehicle'),
-                  ),
-                  const SizedBox(height: 24),
-                  if (_vehicle != null)
-                    Expanded(
-                      child: Card(
-                        elevation: 4,
-                        margin: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Vehicle Details:',
-                                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => _navigateToLogScreen(context),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: _logout,
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          value: _selectedBrand,
+                          hint: const Text('Select Brand'),
+                          items: _brands.map((String brand) {
+                            return DropdownMenuItem<String>(
+                              value: brand,
+                              child: Text(brand),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedBrand = newValue;
+                              _models = [];
+                              _engines = [];
+                              _selectedModel = null;
+                              _selectedEngine = null;
+                            });
+                            if (newValue != null) {
+                              _loadModels(newValue);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _selectedModel,
+                          hint: const Text('Select Model'),
+                          items: _models.map((String model) {
+                            return DropdownMenuItem<String>(
+                              value: model,
+                              child: Text(model),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedModel = newValue;
+                              _engines = [];
+                              _selectedEngine = null;
+                            });
+                            if (newValue != null) {
+                              _loadEngines(newValue);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _selectedEngine,
+                          hint: const Text('Select Engine'),
+                          items: _engines.map((String engine) {
+                            return DropdownMenuItem<String>(
+                              value: engine,
+                              child: Text(engine),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedEngine = newValue;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _carYearController,
+                          readOnly: true,
+                          onTap: () => _selectYear(context),
+                          decoration: const InputDecoration(labelText: 'Year of Manufacture'),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _saveVehicle,
+                          child: const Text('Save Vehicle'),
+                        ),
+                        const SizedBox(height: 24),
+                        if (_vehicle != null)
+                          Flexible(
+                            child: Card(
+                              elevation: 4,
+                              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Vehicle Details:',
+                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text('Brand: ${_vehicle!['carBrand']}', style: const TextStyle(fontSize: 18)),
+                                    Text('Model: ${_vehicle!['carModel']}', style: const TextStyle(fontSize: 18)),
+                                    Text('Engine: ${_vehicle!['engineType']}', style: const TextStyle(fontSize: 18)),
+                                    Text('Year: ${_vehicle!['carYear']}', style: const TextStyle(fontSize: 18)),
+                                    Text('Average Consumption: ${_vehicle!['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 8),
-                              Text('Brand: ${_vehicle!['carBrand']}', style: const TextStyle(fontSize: 18)),
-                              Text('Model: ${_vehicle!['carModel']}', style: const TextStyle(fontSize: 18)),
-                              Text('Engine: ${_vehicle!['engineType']}', style: const TextStyle(fontSize: 18)),
-                              Text('Year: ${_vehicle!['carYear']}', style: const TextStyle(fontSize: 18)),
-                              Text('Average Consumption: ${_vehicle!['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
-                            ],
+                            ),
                           ),
+                      ],
+                    ),
+            ),
+            if (_isMenuOpen)
+              FadeTransition(
+                opacity: _opacityAnimation,
+                child: ModalBarrier(
+                  dismissible: true,
+                  color: Colors.black54,
+                  onDismiss: () {
+                    _toggleMenu();
+                  },
+                ),
+              ),
+            if (_isMenuOpen)
+              Center(
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          _onMenuSelected('Car Details');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16.0),
+                          color: Colors.white,
+                          child: const Text('Car Details', style: TextStyle(fontSize: 18)),
                         ),
                       ),
-                    ),
-                ],
+                      GestureDetector(
+                        onTap: () {
+                          _onMenuSelected('Account');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16.0),
+                          color: Colors.white,
+                          child: const Text('Account', style: TextStyle(fontSize: 18)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
+          ],
+        ),
       ),
     );
   }

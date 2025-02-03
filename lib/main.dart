@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'fuel_log_screen.dart'; // Main app screen
 import 'login_page.dart'; // Login screen
 import 'signup_page.dart'; // Sign up screen
-import 'car_detail_page.dart'; // Account page
+import 'car_detail_page.dart'; // Car detail page
 import 'forum_page.dart'; // Forum page
 import 'firebase_options.dart'; // Firebase configuration file
 
@@ -35,7 +35,7 @@ class FuelTrackerApp extends StatelessWidget {
           case '/signup':
             return _buildPageRoute(const SignUpPage(), settings);
           case '/account':
-            return _buildPageRoute(const AccountPage(), settings);
+            return _buildPageRoute(const CarDetailPage(), settings);
           case '/forum_page':
             return _buildPageRoute(const ForumPage(), settings);
           default:

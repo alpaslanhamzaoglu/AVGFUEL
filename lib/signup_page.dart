@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'car_detail_page.dart'; // Import the account page
+import 'car_detail_page.dart'; // Import the car detail page
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -74,7 +74,7 @@ class _SignUpPageState extends State<SignUpPage> {
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const AccountPage(),
+          pageBuilder: (context, animation, secondaryAnimation) => const CarDetailPage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
