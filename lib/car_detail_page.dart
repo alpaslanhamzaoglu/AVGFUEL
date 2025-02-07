@@ -13,6 +13,7 @@ class CarDetailPage extends StatefulWidget {
 
 class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProviderStateMixin {
   final TextEditingController _carYearController = TextEditingController();
+  final TextEditingController _carNameController = TextEditingController();
   String? _selectedBrand;
   String? _selectedModel;
   String? _selectedEngine;
@@ -23,13 +24,13 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
   List<String> _brands = [];
   List<String> _models = [];
   List<String> _engines = [];
-  Map<String, dynamic>? _vehicle;
+  List<Map<String, dynamic>> _vehicles = [];
 
   @override
   void initState() {
     super.initState();
     _loadBrands();
-    _loadVehicle();
+    _loadVehicles();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -40,6 +41,7 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
   @override
   void dispose() {
     _carYearController.dispose();
+    _carNameController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -92,7 +94,7 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     }
   }
 
-  Future<void> _loadEngines(String model) async {
+  Future<void> _loadEngines(String brand, String model) async {
     setState(() {
       _isLoading = true;
     });
@@ -100,7 +102,7 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('vehicleBrands')
-          .doc(_selectedBrand)
+          .doc(brand)
           .collection('models')
           .doc(model)
           .collection('engines')
@@ -120,7 +122,7 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     }
   }
 
-  Future<void> _loadVehicle() async {
+  Future<void> _loadVehicles() async {
     setState(() {
       _isLoading = true;
     });
@@ -128,20 +130,19 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          final data = doc.data();
-          if (data != null && data['vehicle'] != null) {
-            setState(() {
-              _vehicle = data['vehicle'];
-              // Do not pre-fill any fields
-            });
-          }
-        }
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('vehicles')
+            .get();
+        final List<Map<String, dynamic>> vehicles = querySnapshot.docs.map((doc) => doc.data()).toList();
+        setState(() {
+          _vehicles = vehicles;
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading vehicle: $e')),
+        SnackBar(content: Text('Error loading vehicles: $e')),
       );
     } finally {
       setState(() {
@@ -177,8 +178,9 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
 
   Future<void> _saveVehicle() async {
     final carYear = _carYearController.text.trim();
+    final carName = _carNameController.text.trim();
 
-    if (_selectedBrand == null || _selectedModel == null || _selectedEngine == null || carYear.isEmpty) {
+    if (_selectedBrand == null || _selectedModel == null || _selectedEngine == null || carYear.isEmpty || carName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('All fields are required!'),
@@ -196,6 +198,7 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         final newVehicle = {
+          'name': carName,
           'carBrand': _selectedBrand,
           'carModel': _selectedModel,
           'carYear': int.parse(carYear),
@@ -208,9 +211,11 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
           'mandatoryInsurance': 0.0,
         };
 
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-          'vehicle': newVehicle,
-        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('vehicles')
+            .add(newVehicle);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -221,11 +226,12 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
           );
           // Clear the controllers after saving the details
           _carYearController.clear();
+          _carNameController.clear();
           setState(() {
             _selectedBrand = null;
             _selectedModel = null;
             _selectedEngine = null;
-            _vehicle = newVehicle;
+            _vehicles.add(newVehicle);
           });
         }
       }
@@ -313,6 +319,139 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     });
   }
 
+  void _showAddCarDialog() {
+    String? tempSelectedBrand;
+    String? tempSelectedModel;
+    String? tempSelectedEngine;
+    List<String> tempModels = [];
+    List<String> tempEngines = [];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add New Car'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8, // Make the dialog wider
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _carNameController,
+                      decoration: const InputDecoration(labelText: 'Vehicle Name'),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: tempSelectedBrand,
+                      hint: const Text('Select Brand'),
+                      items: _brands.map((String brand) {
+                        return DropdownMenuItem<String>(
+                          value: brand,
+                          child: Text(brand),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          tempSelectedBrand = newValue;
+                          tempModels = [];
+                          tempEngines = [];
+                          tempSelectedModel = null;
+                          tempSelectedEngine = null;
+                        });
+                        if (newValue != null) {
+                          _loadModels(newValue).then((_) {
+                            setState(() {
+                              tempModels = _models;
+                            });
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: tempSelectedModel,
+                      hint: const Text('Select Model'),
+                      items: tempModels.map((String model) {
+                        return DropdownMenuItem<String>(
+                          value: model,
+                          child: Text(model),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          tempSelectedModel = newValue;
+                          tempEngines = [];
+                          tempSelectedEngine = null;
+                        });
+                        if (newValue != null && tempSelectedBrand != null) {
+                          _loadEngines(tempSelectedBrand!, newValue).then((_) {
+                            setState(() {
+                              tempEngines = _engines;
+                            });
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: tempSelectedEngine,
+                      hint: const Text('Select Engine'),
+                      items: tempEngines.map((String engine) {
+                        return DropdownMenuItem<String>(
+                          value: engine,
+                          child: Text(engine),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          tempSelectedEngine = newValue;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _carYearController,
+                      readOnly: true,
+                      onTap: () => _selectYear(context),
+                      decoration: const InputDecoration(labelText: 'Year of Manufacture'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  tempSelectedBrand = null;
+                  tempSelectedModel = null;
+                  tempSelectedEngine = null;
+                });
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedBrand = tempSelectedBrand;
+                  _selectedModel = tempSelectedModel;
+                  _selectedEngine = tempSelectedEngine;
+                });
+                _saveVehicle();
+                Navigator.pop(context);
+              },
+              child: const Text('Save Vehicle'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -341,110 +480,50 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      children: [
-                        DropdownButtonFormField<String>(
-                          value: _selectedBrand,
-                          hint: const Text('Select Brand'),
-                          items: _brands.map((String brand) {
-                            return DropdownMenuItem<String>(
-                              value: brand,
-                              child: Text(brand),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedBrand = newValue;
-                              _models = [];
-                              _engines = [];
-                              _selectedModel = null;
-                              _selectedEngine = null;
-                            });
-                            if (newValue != null) {
-                              _loadModels(newValue);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          value: _selectedModel,
-                          hint: const Text('Select Model'),
-                          items: _models.map((String model) {
-                            return DropdownMenuItem<String>(
-                              value: model,
-                              child: Text(model),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedModel = newValue;
-                              _engines = [];
-                              _selectedEngine = null;
-                            });
-                            if (newValue != null) {
-                              _loadEngines(newValue);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          value: _selectedEngine,
-                          hint: const Text('Select Engine'),
-                          items: _engines.map((String engine) {
-                            return DropdownMenuItem<String>(
-                              value: engine,
-                              child: Text(engine),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedEngine = newValue;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _carYearController,
-                          readOnly: true,
-                          onTap: () => _selectYear(context),
-                          decoration: const InputDecoration(labelText: 'Year of Manufacture'),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _saveVehicle,
-                          child: const Text('Save Vehicle'),
-                        ),
-                        const SizedBox(height: 24),
-                        if (_vehicle != null)
-                          Flexible(
-                            child: Card(
-                              elevation: 4,
-                              margin: const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      'Vehicle Details:',
-                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text('Brand: ${_vehicle!['carBrand']}', style: const TextStyle(fontSize: 18)),
-                                    Text('Model: ${_vehicle!['carModel']}', style: const TextStyle(fontSize: 18)),
-                                    Text('Engine: ${_vehicle!['engineType']}', style: const TextStyle(fontSize: 18)),
-                                    Text('Year: ${_vehicle!['carYear']}', style: const TextStyle(fontSize: 18)),
-                                    Text('Average Consumption: ${_vehicle!['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
-                                  ],
-                                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _showAddCarDialog,
+                      child: const Text('Add New Car'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (_vehicles.isNotEmpty)
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _vehicles.length,
+                        itemBuilder: (context, index) {
+                          final vehicle = _vehicles[index];
+                          return Card(
+                            elevation: 4,
+                            margin: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    vehicle['name'] ?? 'Vehicle Details:',
+                                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text('Brand: ${vehicle['carBrand']}', style: const TextStyle(fontSize: 18)),
+                                  Text('Model: ${vehicle['carModel']}', style: const TextStyle(fontSize: 18)),
+                                  Text('Engine: ${vehicle['engineType']}', style: const TextStyle(fontSize: 18)),
+                                  Text('Year: ${vehicle['carYear']}', style: const TextStyle(fontSize: 18)),
+                                  Text('Average Consumption: ${vehicle['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
+                                ],
                               ),
                             ),
-                          ),
-                      ],
+                          );
+                        },
+                      ),
                     ),
+                ],
+              ),
             ),
             if (_isMenuOpen)
               FadeTransition(

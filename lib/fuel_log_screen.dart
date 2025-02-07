@@ -28,8 +28,11 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   final List<Map<String, double>> _logs = [];
   double _averageConsumption = 0.0;
   String? _selectedVehicleId;
+  Map<String, dynamic>? _selectedVehicle;
+  List<Map<String, dynamic>> _vehicles = [];
   final PageController _pageController = PageController();
   int _selectedPageIndex = 0;
+  bool _isEditing = false;
 
   @override
   void initState() {
@@ -44,43 +47,59 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     if (user == null) {
       Navigator.pushReplacementNamed(context, '/login');
     } else {
-      _loadVehicle(user.uid);
+      _loadVehicles(user.uid);
     }
   }
 
-  Future<void> _loadVehicle(String userId) async {
-    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    if (doc.exists) {
+  Future<void> _loadVehicles(String userId) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('vehicles')
+        .get();
+    final List<Map<String, dynamic>> vehicles = querySnapshot.docs.map((doc) {
       final data = doc.data();
-      if (data != null && data['vehicle'] != null) {
-        setState(() {
-          _selectedVehicleId = data['vehicle']['id'];
-          _averageConsumption = data['vehicle']['averageConsumption'];
-          _lastMaintenanceController.text = data['vehicle']['lastMaintenance'] ?? '';
-          _nextMaintenanceController.text = data['vehicle']['nextMaintenance'] ?? '';
-          _yearlyTaxController.text = data['vehicle']['yearlyTax']?.toString() ?? '';
-          _insuranceController.text = data['vehicle']['insurance']?.toString() ?? '';
-          _mandatoryInsuranceController.text = data['vehicle']['mandatoryInsurance']?.toString() ?? '';
-        });
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+    setState(() {
+      _vehicles = vehicles;
+      if (_vehicles.isNotEmpty) {
+        _selectedVehicle = _vehicles[0];
+        _selectedVehicleId = _selectedVehicle!['id'];
+        _averageConsumption = _selectedVehicle!['averageConsumption'];
+        _lastMaintenanceController.text = _selectedVehicle!['lastMaintenance'] ?? '';
+        _nextMaintenanceController.text = _selectedVehicle!['nextMaintenance'] ?? '';
+        _yearlyTaxController.text = _selectedVehicle!['yearlyTax']?.toString() ?? '';
+        _insuranceController.text = _selectedVehicle!['insurance']?.toString() ?? '';
+        _mandatoryInsuranceController.text = _selectedVehicle!['mandatoryInsurance']?.toString() ?? '';
       }
-    }
+    });
   }
 
   Future<void> _updateVehicleDetails() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    if (user != null && _selectedVehicleId != null) {
       FocusScope.of(context).unfocus();
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-        'vehicle.lastMaintenance': _lastMaintenanceController.text,
-        'vehicle.nextMaintenance': _nextMaintenanceController.text,
-        'vehicle.yearlyTax': double.tryParse(_yearlyTaxController.text) ?? 0.0,
-        'vehicle.insurance': double.tryParse(_insuranceController.text) ?? 0.0,
-        'vehicle.mandatoryInsurance': double.tryParse(_mandatoryInsuranceController.text) ?? 0.0,
-        // Add any other “vehicle.” fields if needed, matching the account page.
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('vehicles')
+          .doc(_selectedVehicleId)
+          .update({
+        'averageConsumption': _averageConsumption,
+        'lastMaintenance': _lastMaintenanceController.text,
+        'nextMaintenance': _nextMaintenanceController.text,
+        'yearlyTax': double.tryParse(_yearlyTaxController.text) ?? 0.0,
+        'insurance': double.tryParse(_insuranceController.text) ?? 0.0,
+        'mandatoryInsurance': double.tryParse(_mandatoryInsuranceController.text) ?? 0.0,
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Details updated successfully!'), backgroundColor: Colors.green),
       );
+      setState(() {
+        _isEditing = false;
+      });
     }
   }
 
@@ -109,12 +128,13 @@ class FuelLogScreenState extends State<FuelLogScreen> {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
+            .collection('vehicles')
+            .doc(_selectedVehicleId)
             .collection('logs')
             .add({
           'kilometers': kilometers,
           'liters': liters,
           'timestamp': FieldValue.serverTimestamp(),
-          'vehicleId': _selectedVehicleId,
         });
 
         // Update average consumption in the vehicle
@@ -146,44 +166,68 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   }
 
   Future<void> _updateAverageConsumption(String userId) async {
-    final logsSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('logs')
-        .where('vehicleId', isEqualTo: _selectedVehicleId)
-        .orderBy('timestamp')
-        .get();
+    try {
+      final logsSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('vehicles')
+          .doc(_selectedVehicleId)
+          .collection('logs')
+          .orderBy('timestamp')
+          .get();
 
-    if (logsSnapshot.docs.length < 2) {
-      await FirebaseFirestore.instance.collection('users').doc(userId).update({
-        'vehicle.averageConsumption': 0.0,
+      if (logsSnapshot.docs.length < 2) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('vehicles')
+            .doc(_selectedVehicleId)
+            .update({
+          'averageConsumption': 0.0,
+        });
+        setState(() {
+          _averageConsumption = 0.0;
+        });
+        return;
+      }
+
+      double totalDistance = 0.0;
+      double totalLiters = 0.0;
+
+      for (int i = 1; i < logsSnapshot.docs.length; i++) {
+        final log = logsSnapshot.docs[i].data();
+        final previousLog = logsSnapshot.docs[i - 1].data();
+        final double distance = (log['kilometers'] - previousLog['kilometers']).abs();
+        totalDistance += distance;
+        totalLiters += log['liters'];
+      }
+
+      final averageConsumption = (totalLiters / totalDistance) * 100;
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('vehicles')
+          .doc(_selectedVehicleId)
+          .update({
+        'averageConsumption': averageConsumption,
       });
+
       setState(() {
-        _averageConsumption = 0.0;
+        _averageConsumption = averageConsumption;
       });
-      return;
+    } on FirebaseException catch (e) {
+      if (e.code == 'failed-precondition') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Firestore index is required. Please create the index in the Firebase console.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        rethrow;
+      }
     }
-
-    double totalDistance = 0.0;
-    double totalLiters = 0.0;
-
-    for (int i = 1; i < logsSnapshot.docs.length; i++) {
-      final log = logsSnapshot.docs[i].data();
-      final previousLog = logsSnapshot.docs[i - 1].data();
-      final double distance = (log['kilometers'] - previousLog['kilometers']).abs();
-      totalDistance += distance;
-      totalLiters += log['liters'];
-    }
-
-    final averageConsumption = (totalLiters / totalDistance) * 100;
-
-    await FirebaseFirestore.instance.collection('users').doc(userId).update({
-      'vehicle.averageConsumption': averageConsumption,
-    });
-
-    setState(() {
-      _averageConsumption = averageConsumption;
-    });
   }
 
   void _navigateToForumPage(BuildContext context) {
@@ -230,6 +274,63 @@ class FuelLogScreenState extends State<FuelLogScreen> {
       pageIndex,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
+    );
+  }
+
+  void _showUpdateDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Update Vehicle Details'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildEditableField(
+                label: 'Last Maintenance',
+                controller: _lastMaintenanceController,
+                onTap: () => _selectDate(context, _lastMaintenanceController),
+              ),
+              const SizedBox(height: 8),
+              _buildEditableField(
+                label: 'Next Maintenance',
+                controller: _nextMaintenanceController,
+                onTap: () => _selectDate(context, _nextMaintenanceController),
+              ),
+              const SizedBox(height: 8),
+              _buildEditableField(
+                label: 'Yearly Tax',
+                controller: _yearlyTaxController,
+              ),
+              const SizedBox(height: 8),
+              _buildEditableField(
+                label: 'Insurance',
+                controller: _insuranceController,
+              ),
+              const SizedBox(height: 8),
+              _buildEditableField(
+                label: 'Mandatory Insurance',
+                controller: _mandatoryInsuranceController,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _updateVehicleDetails();
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -298,36 +399,74 @@ class FuelLogScreenState extends State<FuelLogScreen> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildEditableField(
-            label: 'Last Maintenance',
-            controller: _lastMaintenanceController,
-            onTap: () => _selectDate(context, _lastMaintenanceController),
-          ),
-          const SizedBox(height: 8),
-          _buildEditableField(
-            label: 'Next Maintenance',
-            controller: _nextMaintenanceController,
-            onTap: () => _selectDate(context, _nextMaintenanceController),
-          ),
-          const SizedBox(height: 8),
-          _buildEditableField(
-            label: 'Yearly Tax',
-            controller: _yearlyTaxController,
-          ),
-          const SizedBox(height: 8),
-          _buildEditableField(
-            label: 'Insurance',
-            controller: _insuranceController,
-          ),
-          const SizedBox(height: 8),
-          _buildEditableField(
-            label: 'Mandatory Insurance',
-            controller: _mandatoryInsuranceController,
+          Row(
+            children: [
+              const SizedBox(
+                width: 120, // Adjust the width as needed
+                child: Text('Selected Car:', style: TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30.0),
+                    border: Border.all(color: Colors.grey),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<Map<String, dynamic>>(
+                      value: _selectedVehicle,
+                      onChanged: (Map<String, dynamic>? newValue) {
+                        setState(() {
+                          _selectedVehicle = newValue;
+                          _selectedVehicleId = newValue!['id'];
+                          _averageConsumption = newValue['averageConsumption'];
+                          _lastMaintenanceController.text = newValue['lastMaintenance'] ?? '';
+                          _nextMaintenanceController.text = newValue['nextMaintenance'] ?? '';
+                          _yearlyTaxController.text = newValue['yearlyTax']?.toString() ?? '';
+                          _insuranceController.text = newValue['insurance']?.toString() ?? '';
+                          _mandatoryInsuranceController.text = newValue['mandatoryInsurance']?.toString() ?? '';
+                        });
+                      },
+                      items: _vehicles.map<DropdownMenuItem<Map<String, dynamic>>>((Map<String, dynamic> vehicle) {
+                        return DropdownMenuItem<Map<String, dynamic>>(
+                          value: vehicle,
+                          child: Text(vehicle['name'] ?? vehicle['carBrand']),
+                        );
+                      }).toList(),
+                      dropdownColor: Colors.white,
+                      isExpanded: true,
+                      itemHeight: 48,
+                      menuMaxHeight: 300,
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
+          if (!_isEditing)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Last Maintenance: ${_lastMaintenanceController.text}', style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 8),
+                Text('Next Maintenance: ${_nextMaintenanceController.text}', style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 8),
+                Text('Yearly Tax: ${_yearlyTaxController.text}', style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 8),
+                Text('Insurance: ${_insuranceController.text}', style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 8),
+                Text('Mandatory Insurance: ${_mandatoryInsuranceController.text}', style: const TextStyle(fontSize: 18)),
+              ],
+            ),
+          const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: _updateVehicleDetails,
+            onPressed: _showUpdateDialog,
             child: const Text('Update'),
           ),
         ],
@@ -357,6 +496,53 @@ class FuelLogScreenState extends State<FuelLogScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
+          Row(
+            children: [
+              const SizedBox(
+                width: 120, // Adjust the width as needed
+                child: Text('Selected Car:', style: TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30.0),
+                    border: Border.all(color: Colors.grey),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<Map<String, dynamic>>(
+                      value: _selectedVehicle,
+                      onChanged: (Map<String, dynamic>? newValue) {
+                        setState(() {
+                          _selectedVehicle = newValue;
+                          _selectedVehicleId = newValue!['id'];
+                          _averageConsumption = newValue['averageConsumption'];
+                          _lastMaintenanceController.text = newValue['lastMaintenance'] ?? '';
+                          _nextMaintenanceController.text = newValue['nextMaintenance'] ?? '';
+                          _yearlyTaxController.text = newValue['yearlyTax']?.toString() ?? '';
+                          _insuranceController.text = newValue['insurance']?.toString() ?? '';
+                          _mandatoryInsuranceController.text = newValue['mandatoryInsurance']?.toString() ?? '';
+                        });
+                      },
+                      items: _vehicles.map<DropdownMenuItem<Map<String, dynamic>>>((Map<String, dynamic> vehicle) {
+                        return DropdownMenuItem<Map<String, dynamic>>(
+                          value: vehicle,
+                          child: Text(vehicle['name'] ?? vehicle['carBrand']),
+                        );
+                      }).toList(),
+                      dropdownColor: Colors.white,
+                      isExpanded: true,
+                      itemHeight: 48,
+                      menuMaxHeight: 300,
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () => FocusScope.of(context).unfocus(),
@@ -386,12 +572,31 @@ class FuelLogScreenState extends State<FuelLogScreen> {
             child: const Text('Save Log and Calculate'),
           ),
           const SizedBox(height: 16),
-          Text(
-            _logs.length > 1
-                ? 'Average Consumption: ${_averageConsumption.toStringAsFixed(2)} L/100km'
-                : 'Average Consumption: ${_averageConsumption.toStringAsFixed(2)} L/100km',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+          StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(user?.uid)
+                .collection('vehicles')
+                .doc(_selectedVehicleId)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return const Text(
+                  'No data found.',
+                  style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                );
+              }
+              final vehicleData = snapshot.data!.data() as Map<String, dynamic>;
+              final averageConsumption = vehicleData['averageConsumption'] ?? 0.0;
+              return Text(
+                'Average Consumption: ${averageConsumption.toStringAsFixed(2)} L/100km',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              );
+            },
           ),
           const Divider(),
           Expanded(
@@ -400,8 +605,9 @@ class FuelLogScreenState extends State<FuelLogScreen> {
                     stream: FirebaseFirestore.instance
                         .collection('users')
                         .doc(user.uid)
+                        .collection('vehicles')
+                        .doc(_selectedVehicleId)
                         .collection('logs')
-                        .where('vehicleId', isEqualTo: _selectedVehicleId)
                         .orderBy('timestamp', descending: true)
                         .snapshots(),
                     builder: (context, snapshot) {
