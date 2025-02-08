@@ -21,6 +21,8 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
   bool _isMenuOpen = false;
   late AnimationController _animationController;
   late Animation<double> _opacityAnimation;
+  late PageController _pageController;
+  int _selectedPageIndex = 0;
   List<String> _brands = [];
   List<String> _models = [];
   List<String> _engines = [];
@@ -36,6 +38,7 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
       vsync: this,
     );
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+    _pageController = PageController(initialPage: _selectedPageIndex);
   }
 
   @override
@@ -43,6 +46,7 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     _carYearController.dispose();
     _carNameController.dispose();
     _animationController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -276,36 +280,20 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     );
   }
 
+  void _navigateToPage(int pageIndex) {
+    setState(() {
+      _selectedPageIndex = pageIndex;
+    });
+    _pageController.animateToPage(
+      pageIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   void _logout() async {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacementNamed(context, '/login');
-  }
-
-  void _onMenuSelected(String value) {
-    setState(() {
-      _isMenuOpen = false;
-    });
-    if (value == 'Account') {
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const AccountPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOut;
-
-            final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            final offsetAnimation = animation.drive(tween);
-
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            );
-          },
-        ),
-      );
-    }
   }
 
   void _toggleMenu() {
@@ -317,6 +305,17 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
         _animationController.reverse();
       }
     });
+  }
+
+  void _onMenuSelected(String value) {
+    setState(() {
+      _isMenuOpen = false;
+    });
+    if (value == 'Account') {
+      _navigateToPage(1);
+    } else if (value == 'Car Details') {
+      _navigateToPage(0);
+    }
   }
 
   void _showAddCarDialog() {
@@ -461,9 +460,33 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
       },
       child: Scaffold(
         appBar: AppBar(
-          title: GestureDetector(
-            onTap: _toggleMenu,
-            child: const Text('Car Details'),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () => _navigateToPage(0),
+                child: Text(
+                  'Car Details',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: _selectedPageIndex == 0 ? Colors.black : Colors.grey[700],
+                    fontWeight: _selectedPageIndex == 0 ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () => _navigateToPage(1),
+                child: Text(
+                  'Account',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: _selectedPageIndex == 1 ? Colors.black : Colors.grey[700],
+                    fontWeight: _selectedPageIndex == 1 ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ),
+            ],
           ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
@@ -476,100 +499,111 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
             ),
           ],
         ),
-        body: Stack(
+        body: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: _showAddCarDialog,
-                      child: const Text('Add New Car'),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (_vehicles.isNotEmpty)
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _vehicles.length,
-                        itemBuilder: (context, index) {
-                          final vehicle = _vehicles[index];
-                          return Card(
-                            elevation: 4,
-                            margin: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    vehicle['name'] ?? 'Vehicle Details:',
-                                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text('Brand: ${vehicle['carBrand']}', style: const TextStyle(fontSize: 18)),
-                                  Text('Model: ${vehicle['carModel']}', style: const TextStyle(fontSize: 18)),
-                                  Text('Engine: ${vehicle['engineType']}', style: const TextStyle(fontSize: 18)),
-                                  Text('Year: ${vehicle['carYear']}', style: const TextStyle(fontSize: 18)),
-                                  Text('Average Consumption: ${vehicle['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            if (_isMenuOpen)
-              FadeTransition(
-                opacity: _opacityAnimation,
-                child: ModalBarrier(
-                  dismissible: true,
-                  color: Colors.black54,
-                  onDismiss: () {
-                    _toggleMenu();
-                  },
-                ),
-              ),
-            if (_isMenuOpen)
-              Center(
-                child: Material(
-                  color: Colors.transparent,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          _onMenuSelected('Car Details');
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16.0),
-                          color: Colors.white,
-                          child: const Text('Car Details', style: TextStyle(fontSize: 18)),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          _onMenuSelected('Account');
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16.0),
-                          color: Colors.white,
-                          child: const Text('Account', style: TextStyle(fontSize: 18)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            _buildCarDetailsPage(),
+            const AccountPage(), // Use the AccountPage widget
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCarDetailsPage() {
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: ElevatedButton(
+                  onPressed: _showAddCarDialog,
+                  child: const Text('Add New Car'),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (_vehicles.isNotEmpty)
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _vehicles.length,
+                    itemBuilder: (context, index) {
+                      final vehicle = _vehicles[index];
+                      return Card(
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                vehicle['name'] ?? 'Vehicle Details:',
+                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Brand: ${vehicle['carBrand']}', style: const TextStyle(fontSize: 18)),
+                              Text('Model: ${vehicle['carModel']}', style: const TextStyle(fontSize: 18)),
+                              Text('Engine: ${vehicle['engineType']}', style: const TextStyle(fontSize: 18)),
+                              Text('Year: ${vehicle['carYear']}', style: const TextStyle(fontSize: 18)),
+                              Text('Average Consumption: ${vehicle['averageConsumption']} L/100km', style: const TextStyle(fontSize: 18)),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (_isMenuOpen)
+          FadeTransition(
+            opacity: _opacityAnimation,
+            child: ModalBarrier(
+              dismissible: true,
+              color: Colors.black54,
+              onDismiss: () {
+                _toggleMenu();
+              },
+            ),
+          ),
+        if (_isMenuOpen)
+          Center(
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      _onMenuSelected('Car Details');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      color: Colors.white,
+                      child: const Text('Car Details', style: TextStyle(fontSize: 18)),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      _onMenuSelected('Account');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      color: Colors.white,
+                      child: const Text('Account', style: TextStyle(fontSize: 18)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
