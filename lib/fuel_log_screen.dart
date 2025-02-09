@@ -375,7 +375,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
         ),
         actions: [
           IconButton(
-            icon: Image.asset('assets/car.png'),
+            icon: Image.asset('assets/licence.png'),
             onPressed: () {
               // Clear focus before navigating
               FocusScope.of(context).unfocus();

@@ -54,6 +54,9 @@ class _SignUpPageState extends State<SignUpPage> {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
+      // Send email verification
+      await userCredential.user?.sendEmailVerification();
+
       // Save user details to Firestore
       await FirebaseFirestore.instance
           .collection('users')
@@ -66,7 +69,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Account created successfully!'),
+          content: Text('Account created successfully! Please verify your email.'),
           backgroundColor: Colors.green,
         ),
       );

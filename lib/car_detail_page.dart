@@ -257,6 +257,78 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     }
   }
 
+  Future<void> _updateVehicle(String vehicleId) async {
+    final carYear = _carYearController.text.trim();
+    final carName = _carNameController.text.trim();
+
+    if (_selectedBrand == null || _selectedModel == null || _selectedEngine == null || carYear.isEmpty || carName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All fields are required!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final updatedVehicle = {
+          'name': carName,
+          'carBrand': _selectedBrand,
+          'carModel': _selectedModel,
+          'carYear': int.parse(carYear),
+          'engineType': _selectedEngine,
+        };
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('vehicles')
+            .doc(vehicleId)
+            .update(updatedVehicle);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Vehicle updated successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Clear the controllers after updating the details
+          _carYearController.clear();
+          _carNameController.clear();
+          setState(() {
+            _selectedBrand = null;
+            _selectedModel = null;
+            _selectedEngine = null;
+            _loadVehicles();
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating vehicle: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   void _navigateToLogScreen(BuildContext context) {
     FocusScope.of(context).unfocus();
     Navigator.pushReplacement(
@@ -451,6 +523,157 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
     );
   }
 
+  void _showEditCarDialog(Map<String, dynamic> vehicle) {
+    _carNameController.text = vehicle['name'] ?? '';
+    _carYearController.text = vehicle['carYear'].toString();
+    _selectedBrand = vehicle['carBrand'];
+    _selectedModel = vehicle['carModel'];
+    _selectedEngine = vehicle['engineType'];
+
+    String? tempSelectedBrand = _selectedBrand;
+    String? tempSelectedModel = _selectedModel;
+    String? tempSelectedEngine = _selectedEngine;
+    List<String> tempModels = [];
+    List<String> tempEngines = [];
+
+    _loadModels(tempSelectedBrand!).then((_) {
+      setState(() {
+        tempModels = _models;
+      });
+    });
+
+    _loadEngines(tempSelectedBrand, tempSelectedModel!).then((_) {
+      setState(() {
+        tempEngines = _engines;
+      });
+    });
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Car'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8, // Make the dialog wider
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _carNameController,
+                      decoration: const InputDecoration(labelText: 'Vehicle Name'),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: tempSelectedBrand,
+                      hint: const Text('Select Brand'),
+                      items: _brands.map((String brand) {
+                        return DropdownMenuItem<String>(
+                          value: brand,
+                          child: Text(brand),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          tempSelectedBrand = newValue;
+                          tempModels = [];
+                          tempEngines = [];
+                          tempSelectedModel = null;
+                          tempSelectedEngine = null;
+                        });
+                        if (newValue != null) {
+                          _loadModels(newValue).then((_) {
+                            setState(() {
+                              tempModels = _models;
+                            });
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: tempSelectedModel,
+                      hint: const Text('Select Model'),
+                      items: tempModels.map((String model) {
+                        return DropdownMenuItem<String>(
+                          value: model,
+                          child: Text(model),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          tempSelectedModel = newValue;
+                          tempEngines = [];
+                          tempSelectedEngine = null;
+                        });
+                        if (newValue != null && tempSelectedBrand != null) {
+                          _loadEngines(tempSelectedBrand!, newValue).then((_) {
+                            setState(() {
+                              tempEngines = _engines;
+                            });
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: tempSelectedEngine,
+                      hint: const Text('Select Engine'),
+                      items: tempEngines.map((String engine) {
+                        return DropdownMenuItem<String>(
+                          value: engine,
+                          child: Text(engine),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          tempSelectedEngine = newValue;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _carYearController,
+                      readOnly: true,
+                      onTap: () => _selectYear(context),
+                      decoration: const InputDecoration(labelText: 'Year of Manufacture'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  tempSelectedBrand = null;
+                  tempSelectedModel = null;
+                  tempSelectedEngine = null;
+                });
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedBrand = tempSelectedBrand;
+                  _selectedModel = tempSelectedModel;
+                  _selectedEngine = tempSelectedEngine;
+                });
+                _updateVehicle(vehicle['id']);
+                Navigator.pop(context);
+              },
+              child: const Text('Save Changes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -499,14 +722,16 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
             ),
           ],
         ),
-        body: PageView(
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            _buildCarDetailsPage(),
-            const AccountPage(), // Use the AccountPage widget
-          ],
-        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildCarDetailsPage(),
+                  const AccountPage(), // Use the AccountPage widget
+                ],
+              ),
       ),
     );
   }
@@ -541,9 +766,18 @@ class _CarDetailPageState extends State<CarDetailPage> with SingleTickerProvider
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                vehicle['name'] ?? 'Vehicle Details:',
-                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    vehicle['name'] ?? 'Vehicle Details:',
+                                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: () => _showEditCarDialog(vehicle),
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 8),
                               Text('Brand: ${vehicle['carBrand']}', style: const TextStyle(fontSize: 18)),

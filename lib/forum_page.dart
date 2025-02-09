@@ -213,7 +213,7 @@ class _ForumPageState extends State<ForumPage> {
                     ),
                   ],
                 )
-              : const Text('Forum Page'),
+              : const Text('Forum'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
