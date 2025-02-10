@@ -301,14 +301,21 @@ class _ForumPageState extends State<ForumPage> {
           itemCount: forums.length,
           itemBuilder: (context, index) {
             final forum = forums[index];
-            return ListTile(
-              title: Text(forum['title'] ?? 'No Title'),
-              subtitle: Text(forum['description'] ?? 'No Description'),
-              onTap: () {
-                setState(() {
-                  _selectedForumId = forum.id;
-                });
-              },
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              elevation: 0, // Remove shadow
+              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: ListTile(
+                title: Text(forum['title'] ?? 'No Title'),
+                subtitle: Text(forum['description'] ?? 'No Description'),
+                onTap: () {
+                  setState(() {
+                    _selectedForumId = forum.id;
+                  });
+                },
+              ),
             );
           },
         );
@@ -335,15 +342,22 @@ class _ForumPageState extends State<ForumPage> {
           itemCount: threads.length,
           itemBuilder: (context, index) {
             final thread = threads[index];
-            return ListTile(
-              title: Text(thread['title'] ?? 'No Title'),
-              onTap: () async {
-                final threadData = thread.data() as Map<String, dynamic>;
-                setState(() {
-                  _selectedThreadId = thread.id;
-                  _selectedThreadData = threadData;
-                });
-              },
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              elevation: 0, // Remove shadow
+              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: ListTile(
+                title: Text(thread['title'] ?? 'No Title'),
+                onTap: () async {
+                  final threadData = thread.data() as Map<String, dynamic>;
+                  setState(() {
+                    _selectedThreadId = thread.id;
+                    _selectedThreadData = threadData;
+                  });
+                },
+              ),
             );
           },
         );
@@ -375,9 +389,16 @@ class _ForumPageState extends State<ForumPage> {
           itemBuilder: (context, index) {
             final post = posts[index].data() as Map<String, dynamic>;
             final username = post['username'] ?? 'testuser';
-            return ListTile(
-              title: Text(post['content'] ?? 'No Content'),
-              subtitle: Text(username),
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              elevation: 0, // Remove shadow
+              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: ListTile(
+                title: Text(post['content'] ?? 'No Content'),
+                subtitle: Text(username),
+              ),
             );
           },
         );
