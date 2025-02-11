@@ -15,6 +15,7 @@ class _ForumPageState extends State<ForumPage> {
   String? _selectedForumId;
   String? _selectedThreadId;
   Map<String, dynamic>? _selectedThreadData;
+  String? _selectedForumTitle;
 
   Future<void> _sendText() async {
     final text = _textController.text.trim();
@@ -189,6 +190,7 @@ class _ForumPageState extends State<ForumPage> {
         } else if (_selectedForumId != null) {
           setState(() {
             _selectedForumId = null;
+            _selectedForumTitle = null;
           });
           return false;
         } else {
@@ -213,7 +215,7 @@ class _ForumPageState extends State<ForumPage> {
                     ),
                   ],
                 )
-              : const Text('Forum'),
+              : Text(_selectedForumTitle ?? 'Forum'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -225,6 +227,7 @@ class _ForumPageState extends State<ForumPage> {
               } else if (_selectedForumId != null) {
                 setState(() {
                   _selectedForumId = null;
+                  _selectedForumTitle = null;
                 });
               } else {
                 _navigateToFuelLogScreen(context);
@@ -274,7 +277,11 @@ class _ForumPageState extends State<ForumPage> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.send, color: Colors.blue),
+                      icon: Image.asset(
+                        'assets/send.png',
+                        width: 40, // Adjust the width to make it 2.5 times smaller
+                        height: 40, // Adjust the height to make it 2.5 times smaller
+                      ),
                       onPressed: _sendText,
                     ),
                   ],
@@ -313,6 +320,7 @@ class _ForumPageState extends State<ForumPage> {
                 onTap: () {
                   setState(() {
                     _selectedForumId = forum.id;
+                    _selectedForumTitle = forum['title'];
                   });
                 },
               ),
