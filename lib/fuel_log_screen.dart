@@ -33,6 +33,7 @@ class FuelLogScreenState extends State<FuelLogScreen> {
   final PageController _pageController = PageController();
   int _selectedPageIndex = 0;
   bool _isEditing = false;
+  DocumentSnapshot? _highlightedLog;
 
   @override
   void initState() {
@@ -624,10 +625,22 @@ class FuelLogScreenState extends State<FuelLogScreen> {
                       return ListView.builder(
                         itemCount: logs.length,
                         itemBuilder: (context, index) {
-                          final log = logs[index].data() as Map<String, dynamic>;
-                          return ListTile(
-                            title: Text('Kilometers: ${log['kilometers']}'),
-                            subtitle: Text('Liters: ${log['liters']}'),
+                          final log = logs[index];
+                          final logData = log.data() as Map<String, dynamic>;
+                          final isHighlighted = _highlightedLog?.id == log.id;
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _highlightedLog = log;
+                              });
+                            },
+                            child: Container(
+                              color: isHighlighted ? Colors.yellow : Colors.transparent,
+                              child: ListTile(
+                                title: Text('Kilometers: ${logData['kilometers']}'),
+                                subtitle: Text('Liters: ${logData['liters']}'),
+                              ),
+                            ),
                           );
                         },
                       );
